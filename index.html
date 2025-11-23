@@ -1797,8 +1797,24 @@
             const labs = labResults[currentParent];
             let html = '';
             
+            // Show which parent's ranges are being used
+            const parentRanges = customRanges[currentParent] || {};
+            const customRangeCount = Object.keys(parentRanges).length;
+            
+            if (customRangeCount > 0) {
+                html += `
+                    <div class="alert info" style="margin-bottom: 1rem;">
+                        <strong>📊 Using ${currentParent === 'mom' ? 'Mom' : 'Dad'}'s Custom Reference Ranges</strong><br>
+                        ${customRangeCount} test${customRangeCount > 1 ? 's have' : ' has'} parent-specific reference ranges applied.
+                        <a href="#" onclick="showSettings(); return false;" style="color: #1e40af; text-decoration: underline;">
+                            Manage ranges in settings
+                        </a>
+                    </div>
+                `;
+            }
+            
             if (labs.length === 0) {
-                html = '<div class="empty-state">No lab results yet</div>';
+                html += '<div class="empty-state">No lab results yet</div>';
             } else {
                 labs.sort((a, b) => new Date(b.date) - new Date(a.date));
                 labs.forEach(lab => {
@@ -1833,8 +1849,12 @@
                                 <div class="test-unit">${converted.unit}</div>
                                 <div class="test-status ${status}">${statusText}</div>
                                 <div class="test-range">
-                                    Normal: ${converted.refMin}-${converted.refMax}
-                                    ${converted.hasCustomRange ? '<span class="custom-range-indicator">Custom</span>' : ''}
+                                    ${converted.hasCustomRange ? 
+                                        `<span style="color: ${currentParent === 'mom' ? '#ec4899' : '#2563eb'}; font-weight: 600;">
+                                            ${currentParent === 'mom' ? '👩' : '👨'} Custom:
+                                        </span>` : 
+                                        'Normal:'}
+                                    ${converted.refMin}-${converted.refMax}
                                 </div>
                             </div>
                         `;
@@ -2284,16 +2304,49 @@
                     </div>
                     
                     <div class="settings-section">
-                        <h4 style="margin-bottom: 0.5rem;">Custom Reference Ranges for ${currentParent === 'mom' ? t('mom') : t('dad')}</h4>
-                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">
-                            Override default reference ranges. Each parent can have different ranges.
-                        </p>
+                        <h4 style="margin-bottom: 0.5rem;">Custom Reference Ranges</h4>
+                        <div style="background: #eff6ff; border: 1px solid #60a5fa; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="font-size: 1rem;">👤 Currently editing ranges for:</span>
+                                <strong style="color: ${currentParent === 'mom' ? '#ec4899' : '#2563eb'}; font-size: 1.125rem;">
+                                    ${currentParent === 'mom' ? t('mom') : t('dad')}
+                                </strong>
+                            </div>
+                            <p style="font-size: 0.75rem; color: #1e40af; margin: 0;">
+                                ℹ️ Each parent has separate reference ranges. Switch parent selector to edit the other parent's ranges.
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <button class="btn ${currentParent === 'mom' ? 'btn-purple' : 'btn-gray'}" 
+                                    onclick="selectParentForSettings('mom')" style="font-size: 0.875rem;">
+                                Edit Mom's Ranges
+                            </button>
+                            <button class="btn ${currentParent === 'dad' ? 'btn-blue' : 'btn-gray'}" 
+                                    onclick="selectParentForSettings('dad')" style="font-size: 0.875rem;">
+                                Edit Dad's Ranges
+                            </button>
+                            ${Object.keys(customRanges[currentParent === 'mom' ? 'dad' : 'mom'] || {}).length > 0 ? `
+                                <button class="btn btn-orange" onclick="copyRangesFromOtherParent()" 
+                                        style="font-size: 0.875rem;" title="Copy ranges from ${currentParent === 'mom' ? 'Dad' : 'Mom'}">
+                                    📋 Copy from ${currentParent === 'mom' ? t('dad') : t('mom')}
+                                </button>
+                            ` : ''}
+                        </div>
+                        
                         ${testsForRangeCustomization.length === 0 ? `
                             <div style="text-align: center; padding: 2rem; color: #6b7280; background: #f3f4f6; border-radius: 0.25rem;">
-                                Add some lab results first to customize their reference ranges
+                                Add some lab results for ${currentParent === 'mom' ? t('mom') : t('dad')} first to customize reference ranges
                             </div>
                         ` : `
                             <div class="range-settings">
+                                <div style="background: ${currentParent === 'mom' ? '#fce7f3' : '#dbeafe'}; 
+                                            padding: 0.5rem; border-radius: 0.25rem; margin-bottom: 0.75rem; text-align: center;">
+                                    <strong>${currentParent === 'mom' ? '👩 Mom' : '👨 Dad'}'s Custom Ranges</strong>
+                                    ${Object.keys(parentRanges).length > 0 ? 
+                                        ` (${Object.keys(parentRanges).length} customized)` : 
+                                        ' (Using default ranges)'}
+                                </div>
                                 ${testsForRangeCustomization.map(testKey => {
                                     const [testName, unit] = testKey.split('-');
                                     const customRange = parentRanges[testKey];
@@ -2407,6 +2460,32 @@
             customRanges[currentParent] = parentRanges;
             saveData();
             showSettings(); // Refresh
+        }
+
+        // New function to switch parent in settings
+        function selectParentForSettings(parent) {
+            currentParent = parent;
+            document.getElementById('momBtn').className = parent === 'mom' ? 'parent-btn mom' : 'parent-btn inactive';
+            document.getElementById('dadBtn').className = parent === 'dad' ? 'parent-btn dad' : 'parent-btn inactive';
+            showSettings(); // Refresh settings to show new parent's ranges
+        }
+
+        // New function to copy ranges from other parent
+        function copyRangesFromOtherParent() {
+            const otherParent = currentParent === 'mom' ? 'dad' : 'mom';
+            const otherRanges = customRanges[otherParent] || {};
+            
+            if (Object.keys(otherRanges).length === 0) {
+                alert(`No custom ranges found for ${otherParent === 'mom' ? 'Mom' : 'Dad'}`);
+                return;
+            }
+            
+            if (confirm(`This will copy all custom ranges from ${otherParent === 'mom' ? 'Mom' : 'Dad'} to ${currentParent === 'mom' ? 'Mom' : 'Dad'}. Existing custom ranges will be overwritten. Continue?`)) {
+                customRanges[currentParent] = { ...otherRanges };
+                saveData();
+                showSettings(); // Refresh to show copied ranges
+                alert(`Successfully copied ${Object.keys(otherRanges).length} custom ranges from ${otherParent === 'mom' ? 'Mom' : 'Dad'}`);
+            }
         }
 
         // Export function with kidney summary
