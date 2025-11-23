@@ -1,2448 +1,1542 @@
-<!DOCTYPE html>import React, { useState, useEffect } from 'react';
-import { Plus, Download, TrendingUp, User, Calendar, Activity, Pill, FileText, AlertCircle, Settings, Edit2, Save, X, Share2, Link, Check, RefreshCw, AlertTriangle, CheckCircle, Globe } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-
-// Translations
-const TRANSLATIONS = {
-  en: {
-    appTitle: "Parent Health Tracker",
-    appSubtitle: "Comprehensive lab results and health monitoring",
-    dashboard: "Dashboard",
-    labResults: "Lab Results",
-    medications: "Medications",
-    appointments: "Appointments",
-    notes: "Notes",
-    mom: "Mom",
-    dad: "Dad",
-    addNew: "Add New",
-    export: "Export",
-    customize: "Customize",
-    enableSharing: "Enable Sharing",
-    sharingEnabled: "Sharing Enabled",
-    totalLabTests: "Total Lab Tests",
-    activeMedications: "Active Medications",
-    upcomingAppointments: "Upcoming Appointments",
-    abnormalValues: "Abnormal Values",
-    allNormal: "All normal",
-    needsAttention: "Needs attention",
-    last: "Last",
-    currentlyTaking: "Currently taking",
-    next: "Next",
-    kidneyFunctionStatus: "Kidney Function Status",
-    healthScore: "Health Score",
-    areasOfConcern: "Areas of Concern",
-    valuesOutOfRange: "Values Out of Range",
-    normal: "Normal",
-    low: "Low",
-    high: "High",
-    belowRange: "Below Range",
-    aboveRange: "Above Range",
-    normalRange: "Normal Range",
-    latestValue: "Latest Value",
-    customRange: "Custom range",
-    customRangeActive: "Custom range active",
-    viewTrend: "View trend",
-    close: "Close",
-    save: "Save",
-    cancel: "Cancel",
-    date: "Date",
-    testType: "Test Type",
-    enterResults: "Enter Results",
-    value: "Value",
-    addLabResults: "Add Lab Results",
-    addMedication: "Add Medication",
-    addAppointment: "Add Appointment",
-    addNote: "Add Note",
-    medicationName: "Medication Name",
-    dosage: "Dosage",
-    frequency: "Frequency",
-    time: "Time",
-    oncDaily: "Once daily",
-    twiceDaily: "Twice daily",
-    threeTimesDaily: "Three times daily",
-    asNeeded: "As needed",
-    weekly: "Weekly",
-    doctor: "Doctor",
-    appointmentType: "Appointment Type",
-    title: "Title",
-    category: "Category",
-    content: "Content",
-    general: "General",
-    symptoms: "Symptoms",
-    diet: "Diet",
-    exercise: "Exercise",
-    concerns: "Concerns",
-    noLabResults: "No lab results yet",
-    noMedications: "No medications added yet",
-    noAppointments: "No appointments scheduled",
-    noNotes: "No notes added yet",
-    changeUnits: "Change Units of Measurement",
-    unitPreferences: "Unit Preferences",
-    customizeReferenceRanges: "Customize Reference Ranges",
-    customReferenceRanges: "Custom Reference Ranges",
-    resetToDefault: "Reset to Default",
-    minimum: "Minimum",
-    maximum: "Maximum",
-    resetAllDefaults: "Reset All to Defaults",
-    addPanel: "Add Panel",
-    deletePanel: "Delete",
-    language: "Language"
-  },
-  th: {
-    appTitle: "ติดตามสุขภาพพ่อแม่",
-    appSubtitle: "ติดตามผลแลปและสุขภาพอย่างครบถ้วน",
-    dashboard: "แดชบอร์ด",
-    labResults: "ผลแลป",
-    medications: "ยา",
-    appointments: "นัดหมาย",
-    notes: "บันทึก",
-    mom: "แม่",
-    dad: "พ่อ",
-    addNew: "เพิ่มใหม่",
-    export: "ส่งออก",
-    customize: "ปรับแต่ง",
-    enableSharing: "เปิดการแชร์",
-    sharingEnabled: "กำลังแชร์",
-    totalLabTests: "ตรวจแลปทั้งหมด",
-    activeMedications: "ยาที่ใช้อยู่",
-    upcomingAppointments: "นัดหมายที่จะถึง",
-    abnormalValues: "ค่าผิดปกติ",
-    allNormal: "ปกติทั้งหมด",
-    needsAttention: "ต้องดูแล",
-    last: "ล่าสุด",
-    currentlyTaking: "กำลังใช้",
-    next: "ถัดไป",
-    kidneyFunctionStatus: "สถานะการทำงานของไต",
-    healthScore: "คะแนนสุขภาพ",
-    areasOfConcern: "จุดที่ต้องระวัง",
-    valuesOutOfRange: "ค่าที่อยู่นอกช่วง",
-    normal: "ปกติ",
-    low: "ต่ำ",
-    high: "สูง",
-    belowRange: "ต่ำกว่าปกติ",
-    aboveRange: "สูงกว่าปกติ",
-    normalRange: "ช่วงปกติ",
-    latestValue: "ค่าล่าสุด",
-    customRange: "ช่วงที่กำหนดเอง",
-    customRangeActive: "ใช้ช่วงที่กำหนดเอง",
-    viewTrend: "ดูแนวโน้ม",
-    close: "ปิด",
-    save: "บันทึก",
-    cancel: "ยกเลิก",
-    date: "วันที่",
-    testType: "ประเภทการตรวจ",
-    enterResults: "ใส่ผลการตรวจ",
-    value: "ค่า",
-    addLabResults: "เพิ่มผลแลป",
-    addMedication: "เพิ่มยา",
-    addAppointment: "เพิ่มนัดหมาย",
-    addNote: "เพิ่มบันทึก",
-    medicationName: "ชื่อยา",
-    dosage: "ขนาดยา",
-    frequency: "ความถี่",
-    time: "เวลา",
-    onceDaily: "วันละครั้ง",
-    twiceDaily: "วันละ 2 ครั้ง",
-    threeTimesDaily: "วันละ 3 ครั้ง",
-    asNeeded: "ตามอาการ",
-    weekly: "สัปดาห์ละครั้ง",
-    doctor: "แพทย์",
-    appointmentType: "ประเภทนัดหมาย",
-    title: "หัวข้อ",
-    category: "หมวดหมู่",
-    content: "เนื้อหา",
-    general: "ทั่วไป",
-    symptoms: "อาการ",
-    diet: "อาหาร",
-    exercise: "การออกกำลังกาย",
-    concerns: "ข้อกังวล",
-    noLabResults: "ยังไม่มีผลแลป",
-    noMedications: "ยังไม่มียาที่เพิ่ม",
-    noAppointments: "ยังไม่มีนัดหมาย",
-    noNotes: "ยังไม่มีบันทึก",
-    changeUnits: "เปลี่ยนหน่วยการวัด",
-    unitPreferences: "การตั้งค่าหน่วย",
-    customizeReferenceRanges: "ปรับแต่งช่วงอ้างอิง",
-    customReferenceRanges: "ช่วงอ้างอิงที่กำหนดเอง",
-    resetToDefault: "รีเซ็ตเป็นค่าเริ่มต้น",
-    minimum: "ต่ำสุด",
-    maximum: "สูงสุด",
-    resetAllDefaults: "รีเซ็ตทั้งหมด",
-    addPanel: "เพิ่มแผง",
-    deletePanel: "ลบ",
-    language: "ภาษา"
-  }
-};
-
-// Unit conversion mappings
-const UNIT_CONVERSIONS = {
-  'Glucose': {
-    'mg/dL': { to: { 'mmol/L': (v) => v / 18 }, default: true },
-    'mmol/L': { to: { 'mg/dL': (v) => v * 18 } }
-  },
-  'Total Cholesterol': {
-    'mg/dL': { to: { 'mmol/L': (v) => v / 38.67 }, default: true },
-    'mmol/L': { to: { 'mg/dL': (v) => v * 38.67 } }
-  },
-  'LDL Cholesterol': {
-    'mg/dL': { to: { 'mmol/L': (v) => v / 38.67 }, default: true },
-    'mmol/L': { to: { 'mg/dL': (v) => v * 38.67 } }
-  },
-  'HDL Cholesterol': {
-    'mg/dL': { to: { 'mmol/L': (v) => v / 38.67 }, default: true },
-    'mmol/L': { to: { 'mg/dL': (v) => v * 38.67 } }
-  },
-  'Triglycerides': {
-    'mg/dL': { to: { 'mmol/L': (v) => v / 88.57 }, default: true },
-    'mmol/L': { to: { 'mg/dL': (v) => v * 88.57 } }
-  },
-  'Creatinine': {
-    'mg/dL': { to: { 'μmol/L': (v) => v * 88.4 }, default: true },
-    'μmol/L': { to: { 'mg/dL': (v) => v / 88.4 } }
-  },
-  'BUN': {
-    'mg/dL': { to: { 'mmol/L': (v) => v / 2.8 }, default: true },
-    'mmol/L': { to: { 'mg/dL': (v) => v * 2.8 } }
-  },
-  'Fasting Glucose': {
-    'mg/dL': { to: { 'mmol/L': (v) => v / 18 }, default: true },
-    'mmol/L': { to: { 'mg/dL': (v) => v * 18 } }
-  },
-  'Hemoglobin': {
-    'g/dL': { to: { 'g/L': (v) => v * 10, 'mmol/L': (v) => v * 0.6206 }, default: true },
-    'g/L': { to: { 'g/dL': (v) => v / 10, 'mmol/L': (v) => v * 0.06206 } },
-    'mmol/L': { to: { 'g/dL': (v) => v / 0.6206, 'g/L': (v) => v / 0.06206 } }
-  },
-  'Calcium': {
-    'mg/dL': { to: { 'mmol/L': (v) => v / 4.0 }, default: true },
-    'mmol/L': { to: { 'mg/dL': (v) => v * 4.0 } }
-  },
-  'Uric Acid': {
-    'mg/dL': { to: { 'µmol/L': (v) => v * 59.48 }, default: true },
-    'µmol/L': { to: { 'mg/dL': (v) => v / 59.48 } }
-  },
-  'Cystatin C': {
-    'mg/L': { to: { 'nmol/L': (v) => v * 74.9 }, default: true },
-    'nmol/L': { to: { 'mg/L': (v) => v / 74.9 } }
-  }
-};
-
-const DEFAULT_LAB_TEMPLATES = {
-  'Complete Blood Count (CBC)': [
-    { name: 'WBC', unit: 'K/uL', refMin: 4.5, refMax: 11.0 },
-    { name: 'RBC', unit: 'M/uL', refMin: 4.5, refMax: 5.9 },
-    { name: 'Hemoglobin', unit: 'g/dL', refMin: 13.5, refMax: 17.5 },
-    { name: 'Hematocrit', unit: '%', refMin: 38.8, refMax: 50.0 },
-    { name: 'Platelets', unit: 'K/uL', refMin: 150, refMax: 400 },
-    { name: 'MCV', unit: 'fL', refMin: 80, refMax: 100 },
-    { name: 'MCH', unit: 'pg', refMin: 27, refMax: 33 },
-    { name: 'MCHC', unit: 'g/dL', refMin: 32, refMax: 36 }
-  ],
-  'Metabolic Panel (CMP)': [
-    { name: 'Glucose', unit: 'mg/dL', refMin: 70, refMax: 100 },
-    { name: 'BUN', unit: 'mg/dL', refMin: 7, refMax: 20 },
-    { name: 'Creatinine', unit: 'mg/dL', refMin: 0.7, refMax: 1.3 },
-    { name: 'eGFR', unit: 'mL/min/1.73m²', refMin: 60, refMax: 120 },
-    { name: 'Sodium', unit: 'mmol/L', refMin: 136, refMax: 145 },
-    { name: 'Potassium', unit: 'mmol/L', refMin: 3.5, refMax: 5.0 },
-    { name: 'Chloride', unit: 'mmol/L', refMin: 98, refMax: 107 },
-    { name: 'CO2', unit: 'mmol/L', refMin: 23, refMax: 29 },
-    { name: 'Calcium', unit: 'mg/dL', refMin: 8.5, refMax: 10.5 }
-  ],
-  'Liver Function': [
-    { name: 'ALT', unit: 'U/L', refMin: 7, refMax: 56 },
-    { name: 'AST', unit: 'U/L', refMin: 10, refMax: 40 },
-    { name: 'ALP', unit: 'U/L', refMin: 44, refMax: 147 },
-    { name: 'Bilirubin Total', unit: 'mg/dL', refMin: 0.3, refMax: 1.2 },
-    { name: 'Bilirubin Direct', unit: 'mg/dL', refMin: 0.0, refMax: 0.3 },
-    { name: 'Albumin', unit: 'g/dL', refMin: 3.5, refMax: 5.5 },
-    { name: 'Total Protein', unit: 'g/dL', refMin: 6.0, refMax: 8.3 },
-    { name: 'GGT', unit: 'U/L', refMin: 0, refMax: 51 }
-  ],
-  'Lipid Panel': [
-    { name: 'Total Cholesterol', unit: 'mg/dL', refMin: 0, refMax: 200 },
-    { name: 'LDL Cholesterol', unit: 'mg/dL', refMin: 0, refMax: 100 },
-    { name: 'HDL Cholesterol', unit: 'mg/dL', refMin: 40, refMax: 999 },
-    { name: 'Triglycerides', unit: 'mg/dL', refMin: 0, refMax: 150 },
-    { name: 'VLDL', unit: 'mg/dL', refMin: 5, refMax: 40 }
-  ],
-  'Thyroid Function': [
-    { name: 'TSH', unit: 'mIU/L', refMin: 0.4, refMax: 4.0 },
-    { name: 'Free T4', unit: 'ng/dL', refMin: 0.8, refMax: 1.8 },
-    { name: 'Free T3', unit: 'pg/mL', refMin: 2.3, refMax: 4.2 },
-    { name: 'TPO Antibody', unit: 'IU/mL', refMin: 0, refMax: 34 }
-  ],
-  'Diabetes Markers': [
-    { name: 'HbA1c', unit: '%', refMin: 0, refMax: 5.6 },
-    { name: 'Fasting Glucose', unit: 'mg/dL', refMin: 70, refMax: 100 },
-    { name: 'Insulin', unit: 'µU/mL', refMin: 2.6, refMax: 24.9 }
-  ],
-  'Vitamins & Minerals': [
-    { name: 'Vitamin D', unit: 'ng/mL', refMin: 30, refMax: 100 },
-    { name: 'Vitamin B12', unit: 'pg/mL', refMin: 200, refMax: 900 },
-    { name: 'Folate', unit: 'ng/mL', refMin: 3.0, refMax: 20.0 },
-    { name: 'Iron', unit: 'µg/dL', refMin: 60, refMax: 170 },
-    { name: 'Ferritin', unit: 'ng/mL', refMin: 30, refMax: 400 },
-    { name: 'Magnesium', unit: 'mg/dL', refMin: 1.7, refMax: 2.2 }
-  ],
-  'Cardiac Markers': [
-    { name: 'Troponin I', unit: 'ng/mL', refMin: 0, refMax: 0.04 },
-    { name: 'CK-MB', unit: 'ng/mL', refMin: 0, refMax: 5.0 },
-    { name: 'BNP', unit: 'pg/mL', refMin: 0, refMax: 100 },
-    { name: 'CRP', unit: 'mg/L', refMin: 0, refMax: 3.0 }
-  ],
-  'Tumor Markers': [
-    { name: 'PSA', unit: 'ng/mL', refMin: 0, refMax: 4.0 },
-    { name: 'CEA', unit: 'ng/mL', refMin: 0, refMax: 3.0 },
-    { name: 'CA 19-9', unit: 'U/mL', refMin: 0, refMax: 37 },
-    { name: 'CA 125', unit: 'U/mL', refMin: 0, refMax: 35 },
-    { name: 'AFP', unit: 'ng/mL', refMin: 0, refMax: 9.0 }
-  ],
-  'Coagulation': [
-    { name: 'PT', unit: 'seconds', refMin: 11, refMax: 13.5 },
-    { name: 'INR', unit: 'ratio', refMin: 0.8, refMax: 1.1 },
-    { name: 'aPTT', unit: 'seconds', refMin: 25, refMax: 35 },
-    { name: 'D-Dimer', unit: 'ng/mL', refMin: 0, refMax: 500 }
-  ],
-  'Electrolytes Extended': [
-    { name: 'Phosphorus', unit: 'mg/dL', refMin: 2.5, refMax: 4.5 },
-    { name: 'Uric Acid', unit: 'mg/dL', refMin: 3.5, refMax: 7.2 },
-    { name: 'Lactate', unit: 'mmol/L', refMin: 0.5, refMax: 2.0 }
-  ],
-  'Hormones': [
-    { name: 'Cortisol', unit: 'µg/dL', refMin: 6.0, refMax: 23.0 },
-    { name: 'Testosterone', unit: 'ng/dL', refMin: 300, refMax: 1000 },
-    { name: 'Estradiol', unit: 'pg/mL', refMin: 10, refMax: 50 },
-    { name: 'Prolactin', unit: 'ng/mL', refMin: 4.0, refMax: 15.0 }
-  ],
-  'Kidney Function Panel': [
-    { name: 'Creatinine', unit: 'mg/dL', refMin: 0.7, refMax: 1.3 },
-    { name: 'BUN', unit: 'mg/dL', refMin: 7, refMax: 20 },
-    { name: 'eGFR', unit: 'mL/min/1.73m²', refMin: 60, refMax: 120 },
-    { name: 'BUN/Creatinine Ratio', unit: 'ratio', refMin: 10, refMax: 20 },
-    { name: 'Albumin', unit: 'g/dL', refMin: 3.5, refMax: 5.5 },
-    { name: 'Uric Acid', unit: 'mg/dL', refMin: 3.5, refMax: 7.2 },
-    { name: 'Cystatin C', unit: 'mg/L', refMin: 0.5, refMax: 1.0 },
-    { name: 'Albumin/Creatinine Ratio', unit: 'mg/g', refMin: 0, refMax: 30 },
-    { name: 'Protein (Urine)', unit: 'mg/dL', refMin: 0, refMax: 14 },
-    { name: 'Microalbumin (Urine)', unit: 'mg/L', refMin: 0, refMax: 30 }
-  ]
-};
-
-const LabTracker = () => {
-  const [selectedParent, setSelectedParent] = useState('mom');
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [labResults, setLabResults] = useState({ mom: [], dad: [] });
-  const [medications, setMedications] = useState({ mom: [], dad: [] });
-  const [appointments, setAppointments] = useState({ mom: [], dad: [] });
-  const [notes, setNotes] = useState({ mom: [], dad: [] });
-  const [labTemplates, setLabTemplates] = useState(DEFAULT_LAB_TEMPLATES);
-  const [showForm, setShowForm] = useState(false);
-  const [showChart, setShowChart] = useState(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [sharingEnabled, setSharingEnabled] = useState(false);
-  const [showShareDialog, setShowShareDialog] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [unitPreferences, setUnitPreferences] = useState({});
-  const [customRanges, setCustomRanges] = useState({ mom: {}, dad: {} });
-  const [language, setLanguage] = useState('en');
-
-  // Load data on mount
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  // Save data whenever it changes
-  useEffect(() => {
-    if (!isLoading) {
-      saveData();
-    }
-  }, [labResults, medications, appointments, notes, labTemplates, sharingEnabled, unitPreferences, customRanges, language]);
-
-  // Translation helper
-  const t = (key) => TRANSLATIONS[language][key] || key;
-
-  // Convert value between units
-  const convertValue = (testName, value, fromUnit, toUnit) => {
-    if (!UNIT_CONVERSIONS[testName] || fromUnit === toUnit) {
-      return value;
-    }
-    
-    const conversion = UNIT_CONVERSIONS[testName][fromUnit];
-    if (conversion && conversion.to[toUnit]) {
-      return parseFloat(conversion.to[toUnit](value).toFixed(2));
-    }
-    return value;
-  };
-
-  // Get available units for a test
-  const getAvailableUnits = (testName) => {
-    if (!UNIT_CONVERSIONS[testName]) return null;
-    return Object.keys(UNIT_CONVERSIONS[testName]);
-  };
-
-  // Get current unit preference or default
-  const getCurrentUnit = (testName, originalUnit) => {
-    if (unitPreferences[testName]) {
-      return unitPreferences[testName];
-    }
-    // Check if there's a default unit defined
-    if (UNIT_CONVERSIONS[testName]) {
-      const defaultUnit = Object.keys(UNIT_CONVERSIONS[testName]).find(
-        unit => UNIT_CONVERSIONS[testName][unit].default
-      );
-      return defaultUnit || originalUnit;
-    }
-    return originalUnit;
-  };
-
-  // Convert result to preferred unit and apply custom ranges
-  const convertResult = (result) => {
-    const preferredUnit = getCurrentUnit(result.name, result.unit);
-    let convertedValue = result.value;
-    let convertedMin = result.refMin;
-    let convertedMax = result.refMax;
-    
-    if (preferredUnit !== result.unit) {
-      convertedValue = convertValue(result.name, result.value, result.unit, preferredUnit);
-      convertedMin = convertValue(result.name, result.refMin, result.unit, preferredUnit);
-      convertedMax = convertValue(result.name, result.refMax, result.unit, preferredUnit);
-    }
-    
-    // Apply custom ranges if they exist for this test and unit (parent-specific)
-    const rangeKey = `${result.name}-${preferredUnit}`;
-    const parentRanges = customRanges[selectedParent] || {};
-    if (parentRanges[rangeKey]) {
-      convertedMin = parentRanges[rangeKey].min;
-      convertedMax = parentRanges[rangeKey].max;
-    }
-    
-    return {
-      ...result,
-      value: convertedValue,
-      unit: preferredUnit,
-      refMin: convertedMin,
-      refMax: convertedMax,
-      originalUnit: result.unit,
-      originalValue: result.value,
-      hasCustomRange: !!parentRanges[rangeKey]
-    };
-  };
-
-  const loadData = async () => {
-    try {
-      // First check for sharing mode
-      const sharingResult = await window.storage.get('sharing-enabled', true);
-      const isShared = sharingResult?.value === 'true';
-      setSharingEnabled(isShared);
-
-      // Load all data
-      const labsResult = await window.storage.get('lab-results', isShared);
-      const medsResult = await window.storage.get('medications', isShared);
-      const aptsResult = await window.storage.get('appointments', isShared);
-      const notesResult = await window.storage.get('notes', isShared);
-      const templatesResult = await window.storage.get('lab-templates', isShared);
-      const unitsResult = await window.storage.get('unit-preferences', isShared);
-      const rangesResult = await window.storage.get('custom-ranges', isShared);
-      const languageResult = await window.storage.get('language', isShared);
-
-      if (labsResult?.value) setLabResults(JSON.parse(labsResult.value));
-      if (medsResult?.value) setMedications(JSON.parse(medsResult.value));
-      if (aptsResult?.value) setAppointments(JSON.parse(aptsResult.value));
-      if (notesResult?.value) setNotes(JSON.parse(notesResult.value));
-      if (unitsResult?.value) setUnitPreferences(JSON.parse(unitsResult.value));
-      if (languageResult?.value) setLanguage(languageResult.value);
-      
-      // Handle custom ranges - migrate old format to new parent-specific format
-      if (rangesResult?.value) {
-        const savedRanges = JSON.parse(rangesResult.value);
-        // Check if it's the old format (flat object) or new format (nested by parent)
-        if (savedRanges.mom || savedRanges.dad) {
-          setCustomRanges(savedRanges);
-        } else {
-          // Old format - apply to both parents
-          setCustomRanges({ mom: savedRanges, dad: savedRanges });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Health Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      }
-      
-      // Merge saved templates with new default templates
-      if (templatesResult?.value) {
-        const savedTemplates = JSON.parse(templatesResult.value);
-        const mergedTemplates = { ...DEFAULT_LAB_TEMPLATES, ...savedTemplates };
-        setLabTemplates(mergedTemplates);
-      } else {
-        setLabTemplates(DEFAULT_LAB_TEMPLATES);
-      }
-      
-    } catch (error) {
-      console.log('No existing data found, starting fresh');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const saveData = async () => {
-    try {
-      await window.storage.set('lab-results', JSON.stringify(labResults), sharingEnabled);
-      await window.storage.set('medications', JSON.stringify(medications), sharingEnabled);
-      await window.storage.set('appointments', JSON.stringify(appointments), sharingEnabled);
-      await window.storage.set('notes', JSON.stringify(notes), sharingEnabled);
-      await window.storage.set('lab-templates', JSON.stringify(labTemplates), sharingEnabled);
-      await window.storage.set('unit-preferences', JSON.stringify(unitPreferences), sharingEnabled);
-      await window.storage.set('custom-ranges', JSON.stringify(customRanges), sharingEnabled);
-      await window.storage.set('language', language, sharingEnabled);
-      await window.storage.set('sharing-enabled', String(sharingEnabled), true);
-    } catch (error) {
-      console.error('Error saving data:', error);
-    }
-  };
-
-  const toggleSharing = async () => {
-    const newSharingState = !sharingEnabled;
-    
-    if (newSharingState) {
-      // Enabling sharing - migrate data to shared storage
-      try {
-        await window.storage.set('lab-results', JSON.stringify(labResults), true);
-        await window.storage.set('medications', JSON.stringify(medications), true);
-        await window.storage.set('appointments', JSON.stringify(appointments), true);
-        await window.storage.set('notes', JSON.stringify(notes), true);
-        await window.storage.set('lab-templates', JSON.stringify(labTemplates), true);
-        await window.storage.set('unit-preferences', JSON.stringify(unitPreferences), true);
-        await window.storage.set('custom-ranges', JSON.stringify(customRanges), true);
-        await window.storage.set('language', language, true);
-        await window.storage.set('sharing-enabled', 'true', true);
-        setSharingEnabled(true);
-        setShowShareDialog(true);
-      } catch (error) {
-        console.error('Error enabling sharing:', error);
-        alert('Error enabling sharing. Please try again.');
-      }
-    } else {
-      // Disabling sharing - migrate data to private storage
-      if (confirm('This will make the data private again. Your caregiver will lose access. Continue?')) {
-        try {
-          await window.storage.set('lab-results', JSON.stringify(labResults), false);
-          await window.storage.set('medications', JSON.stringify(medications), false);
-          await window.storage.set('appointments', JSON.stringify(appointments), false);
-          await window.storage.set('notes', JSON.stringify(notes), false);
-          await window.storage.set('lab-templates', JSON.stringify(labTemplates), false);
-          await window.storage.set('unit-preferences', JSON.stringify(unitPreferences), false);
-          await window.storage.set('custom-ranges', JSON.stringify(customRanges), false);
-          await window.storage.set('language', language, false);
-          await window.storage.set('sharing-enabled', 'false', true);
-          setSharingEnabled(false);
-        } catch (error) {
-          console.error('Error disabling sharing:', error);
-          alert('Error disabling sharing. Please try again.');
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.6;
         }
-      }
-    }
-  };
-
-  const copyShareLink = () => {
-    const shareLink = window.location.href;
-    navigator.clipboard.writeText(shareLink);
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 3000);
-  };
-
-  const ShareDialog = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold">Share Dashboard</h3>
-          <button onClick={() => setShowShareDialog(false)} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
-          </button>
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+        
+        .header p {
+            color: #6b7280;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-blue {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-blue:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-green {
+            background: #059669;
+            color: white;
+        }
+        
+        .btn-green:hover {
+            background: #047857;
+        }
+        
+        .btn-purple {
+            background: #7c3aed;
+            color: white;
+        }
+        
+        .btn-purple:hover {
+            background: #6d28d9;
+        }
+        
+        .btn-gray {
+            background: #9ca3af;
+            color: white;
+        }
+        
+        .btn-gray:hover {
+            background: #6b7280;
+        }
+        
+        .btn-red {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .btn-red:hover {
+            background: #b91c1c;
+        }
+        
+        .parent-selector {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .parent-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .parent-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .parent-btn.inactive {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+        
+        .parent-btn.inactive:hover {
+            background: #e5e7eb;
+        }
+        
+        .parent-btn.mom {
+            background: #ec4899;
+            color: white;
+        }
+        
+        .parent-btn.dad {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+        
+        .tab:hover {
+            background: #e5e7eb;
+        }
+        
+        .tab.active {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .metric-card {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid;
+        }
+        
+        .metric-card.blue {
+            background: #dbeafe;
+            border-color: #2563eb;
+        }
+        
+        .metric-card.green {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+        
+        .metric-card.purple {
+            background: #ede9fe;
+            border-color: #8b5cf6;
+        }
+        
+        .metric-card.red {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .metric-value {
+            font-size: 1.875rem;
+            font-weight: bold;
+        }
+        
+        .metric-info {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .lab-result-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .lab-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        
+        .lab-result-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .lab-result-date {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .lab-results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .test-result {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 2px solid;
+            position: relative;
+        }
+        
+        .test-result.normal {
+            background: #d1fae5;
+            border-color: #34d399;
+        }
+        
+        .test-result.low {
+            background: #dbeafe;
+            border-color: #60a5fa;
+        }
+        
+        .test-result.high {
+            background: #fee2e2;
+            border-color: #f87171;
+        }
+        
+        .test-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .test-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .test-unit {
+            font-size: 0.75rem;
+            color: #4b5563;
+        }
+        
+        .test-status {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .test-status.normal {
+            background: #10b981;
+            color: white;
+        }
+        
+        .test-status.low {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .test-status.high {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .test-range {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .medication-card,
+        .appointment-card,
+        .note-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        
+        .delete-btn:hover {
+            color: #dc2626;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .close-modal:hover {
+            color: #374151;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert.success {
+            background: #d1fae5;
+            border: 1px solid #34d399;
+            color: #065f46;
+        }
+        
+        .alert.warning {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            color: #92400e;
+        }
+        
+        .alert.error {
+            background: #fee2e2;
+            border: 1px solid #f87171;
+            color: #991b1b;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        
+        .settings-panel {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .settings-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .settings-section:last-child {
+            border-bottom: none;
+        }
+        
+        .lab-template-item {
+            background: #f3f4f6;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .lab-template-item input {
+            padding: 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        
+        .kidney-panel {
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid;
+            margin-bottom: 1.5rem;
+        }
+        
+        .kidney-panel.good {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+        
+        .kidney-panel.warning {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        
+        .kidney-panel.danger {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+        
+        .kidney-score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .kidney-score-value {
+            font-size: 1.875rem;
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 0.75rem;
+            background: #e5e7eb;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .progress-fill.good {
+            background: #10b981;
+        }
+        
+        .progress-fill.warning {
+            background: #f59e0b;
+        }
+        
+        .progress-fill.danger {
+            background: #ef4444;
+        }
+        
+        @media (max-width: 640px) {
+            .header-content {
+                flex-direction: column;
+                align-items: start;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .parent-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1 id="appTitle">Parent Health Tracker</h1>
+                    <p id="appSubtitle">Comprehensive lab results and health monitoring</p>
+                </div>
+                <div class="header-buttons">
+                    <button class="btn btn-green" onclick="toggleSharing()">
+                        <span id="sharingBtn">Enable Sharing</span>
+                    </button>
+                    <button class="btn btn-purple" onclick="showSettings()">
+                        <span id="customizeBtn">Customize</span>
+                    </button>
+                    <button class="btn btn-blue" onclick="exportToCSV()">
+                        <span id="exportBtn">Export</span>
+                    </button>
+                </div>
+            </div>
+            <div id="sharingAlert" style="display: none;" class="alert success" style="margin-top: 1rem;">
+                <span id="sharingMsg">Sharing is active - your caregiver can access this dashboard</span>
+            </div>
         </div>
         
-        <div className="space-y-4">
-          <div className="bg-green-50 border border-green-200 rounded p-4">
-            <div className="flex items-start gap-2">
-              <Check className="text-green-600 mt-1" size={20} />
-              <div>
-                <p className="font-medium text-green-800">Sharing is now enabled!</p>
-                <p className="text-sm text-green-700 mt-1">
-                  Anyone with this link can view and edit the health data.
-                </p>
-              </div>
+        <!-- Parent Selector -->
+        <div class="parent-selector">
+            <div class="parent-buttons">
+                <button class="parent-btn mom" onclick="selectParent('mom')" id="momBtn">
+                    <span id="momLabel">Mom</span>
+                </button>
+                <button class="parent-btn inactive" onclick="selectParent('dad')" id="dadBtn">
+                    <span id="dadLabel">Dad</span>
+                </button>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Share this link with your caregiver:</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={window.location.href}
-                readOnly
-                className="flex-1 p-2 border rounded bg-gray-50 text-sm"
-              />
-              <button
-                onClick={copyShareLink}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
-              >
-                {linkCopied ? <Check size={16} /> : <Link size={16} />}
-                {linkCopied ? 'Copied!' : 'Copy'}
-              </button>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('dashboard')" id="dashboardTab">
+                    <span id="dashboardLabel">Dashboard</span>
+                </button>
+                <button class="tab" onclick="switchTab('labs')" id="labsTab">
+                    <span id="labResultsLabel">Lab Results</span>
+                </button>
+                <button class="tab" onclick="switchTab('medications')" id="medicationsTab">
+                    <span id="medicationsLabel">Medications</span>
+                </button>
+                <button class="tab" onclick="switchTab('appointments')" id="appointmentsTab">
+                    <span id="appointmentsLabel">Appointments</span>
+                </button>
+                <button class="tab" onclick="switchTab('notes')" id="notesTab">
+                    <span id="notesLabel">Notes</span>
+                </button>
             </div>
-          </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded p-4">
-            <p className="text-sm text-blue-800">
-              <strong>How it works:</strong>
-            </p>
-            <ul className="text-sm text-blue-700 mt-2 space-y-1 list-disc list-inside">
-              <li>Copy the link above</li>
-              <li>Send it to your caregiver via email, WhatsApp, or text</li>
-              <li>They open the link in their browser</li>
-              <li>Both of you can view and update the data in real-time</li>
-            </ul>
-          </div>
-
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
-            <p className="text-sm text-yellow-800">
-              <strong>⚠️ Important:</strong> Anyone with this link can access and modify the health data. Only share with trusted caregivers.
-            </p>
-          </div>
-
-          <button
-            onClick={() => setShowShareDialog(false)}
-            className="w-full bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-          >
-            Got it
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const addLabResult = (labData) => {
-    const newLab = { ...labData, id: Date.now() };
-    setLabResults({
-      ...labResults,
-      [selectedParent]: [...labResults[selectedParent], newLab]
-    });
-  };
-
-  const addMedication = (med) => {
-    const newMed = { ...med, id: Date.now() };
-    setMedications({
-      ...medications,
-      [selectedParent]: [...medications[selectedParent], newMed]
-    });
-  };
-
-  const addAppointment = (apt) => {
-    const newApt = { ...apt, id: Date.now() };
-    setAppointments({
-      ...appointments,
-      [selectedParent]: [...appointments[selectedParent], newApt]
-    });
-  };
-
-  const addNote = (note) => {
-    const newNote = { ...note, id: Date.now(), timestamp: new Date().toISOString() };
-    setNotes({
-      ...notes,
-      [selectedParent]: [...notes[selectedParent], newNote]
-    });
-  };
-
-  const deleteItem = (id, type) => {
-    switch(type) {
-      case 'labs':
-        setLabResults({
-          ...labResults,
-          [selectedParent]: labResults[selectedParent].filter(l => l.id !== id)
-        });
-        break;
-      case 'medications':
-        setMedications({
-          ...medications,
-          [selectedParent]: medications[selectedParent].filter(m => m.id !== id)
-        });
-        break;
-      case 'appointments':
-        setAppointments({
-          ...appointments,
-          [selectedParent]: appointments[selectedParent].filter(a => a.id !== id)
-        });
-        break;
-      case 'notes':
-        setNotes({
-          ...notes,
-          [selectedParent]: notes[selectedParent].filter(n => n.id !== id)
-        });
-        break;
-    }
-  };
-
-  const exportToCSV = () => {
-    const parent = selectedParent === 'mom' ? 'Mom' : 'Dad';
-    let csv = `${parent}'s Health Data Export\nGenerated: ${new Date().toLocaleString()}\n\n`;
-    
-    csv += 'LAB RESULTS WITH REFERENCE RANGES\n';
-    csv += 'Date,Test Type,Test Name,Value,Unit,Reference Min,Reference Max,Status,Flag\n';
-    labResults[selectedParent].forEach(lab => {
-      lab.results.forEach(result => {
-        const converted = convertResult(result);
-        let status = 'Normal';
-        let flag = '';
-        if (converted.value < converted.refMin) {
-          status = 'Low';
-          flag = '⚠ BELOW RANGE';
-        } else if (converted.value > converted.refMax) {
-          status = 'High';
-          flag = '⚠ ABOVE RANGE';
-        }
-        csv += `${lab.date},${lab.testType},${converted.name},${converted.value},${converted.unit},${converted.refMin},${converted.refMax},${status},${flag}\n`;
-      });
-    });
-    
-    // Add kidney function summary
-    const kidneyTests = ['Creatinine', 'BUN', 'eGFR', 'BUN/Creatinine Ratio', 'Albumin/Creatinine Ratio', 'Uric Acid', 'Cystatin C'];
-    const kidneyData = [];
-    kidneyTests.forEach(testName => {
-      let latest = null;
-      let latestDate = null;
-      labResults[selectedParent].forEach(lab => {
-        lab.results.forEach(result => {
-          if (result.name === testName) {
-            const labDate = new Date(lab.date);
-            if (!latestDate || labDate > latestDate) {
-              latestDate = labDate;
-              latest = { ...convertResult(result), date: lab.date };
-            }
-          }
-        });
-      });
-      if (latest) kidneyData.push(latest);
-    });
-    
-    if (kidneyData.length > 0) {
-      csv += '\nKIDNEY FUNCTION SUMMARY (Latest Results)\n';
-      csv += 'Test Name,Value,Unit,Reference Min,Reference Max,Status,Date\n';
-      kidneyData.forEach(test => {
-        const status = test.value < test.refMin ? 'Low' : test.value > test.refMax ? 'High' : 'Normal';
-        csv += `${test.name},${test.value},${test.unit},${test.refMin},${test.refMax},${status},${test.date}\n`;
-      });
-    }
-    
-    csv += '\nMEDICATIONS\n';
-    csv += 'Name,Dosage,Frequency,Time\n';
-    medications[selectedParent].forEach(med => {
-      csv += `${med.name},${med.dosage},${med.frequency},${med.time}\n`;
-    });
-    
-    csv += '\nAPPOINTMENTS\n';
-    csv += 'Date,Doctor,Type,Notes\n';
-    appointments[selectedParent].forEach(apt => {
-      csv += `${apt.date},${apt.doctor},${apt.type},"${apt.notes || ''}"\n`;
-    });
-    
-    csv += '\nNOTES\n';
-    csv += 'Date,Title,Category,Content\n';
-    notes[selectedParent].forEach(note => {
-      csv += `${new Date(note.timestamp).toLocaleString()},"${note.title}",${note.category},"${note.content}"\n`;
-    });
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${parent}_Health_Data_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-  };
-
-  const SettingsPanel = () => {
-    const [editingPanel, setEditingPanel] = useState(null);
-    const [tempTemplates, setTempTemplates] = useState(labTemplates);
-    const [newPanelName, setNewPanelName] = useState('');
-    const [newTest, setNewTest] = useState({ name: '', unit: '', refMin: '', refMax: '' });
-    const [showUnitSettings, setShowUnitSettings] = useState(false);
-    const [showRangeSettings, setShowRangeSettings] = useState(false);
-
-    // Get all tests that have unit conversions available
-    const testsWithConversions = Object.keys(UNIT_CONVERSIONS);
-    
-    // Get all unique tests from lab results for range customization (parent-specific)
-    const allTests = new Set();
-    labResults[selectedParent].forEach(lab => {
-      lab.results.forEach(r => {
-        const unit = getCurrentUnit(r.name, r.unit);
-        allTests.add(`${r.name}-${unit}`);
-      });
-    });
-    const testsForRangeCustomization = Array.from(allTests).sort();
-    
-    const parentRanges = customRanges[selectedParent] || {};
-
-    const handleSavePanel = (panelName) => {
-      setLabTemplates(tempTemplates);
-      setEditingPanel(null);
-    };
-
-    const handleUpdateTest = (panelName, testIndex, field, value) => {
-      const updated = { ...tempTemplates };
-      updated[panelName][testIndex][field] = field.includes('ref') ? parseFloat(value) : value;
-      setTempTemplates(updated);
-    };
-
-    const handleAddTest = (panelName) => {
-      if (newTest.name && newTest.unit) {
-        const updated = { ...tempTemplates };
-        updated[panelName].push({
-          name: newTest.name,
-          unit: newTest.unit,
-          refMin: parseFloat(newTest.refMin) || 0,
-          refMax: parseFloat(newTest.refMax) || 100
-        });
-        setTempTemplates(updated);
-        setNewTest({ name: '', unit: '', refMin: '', refMax: '' });
-      }
-    };
-
-    const handleRemoveTest = (panelName, testIndex) => {
-      const updated = { ...tempTemplates };
-      updated[panelName].splice(testIndex, 1);
-      setTempTemplates(updated);
-    };
-
-    const handleAddPanel = () => {
-      if (newPanelName && !tempTemplates[newPanelName]) {
-        const updated = { ...tempTemplates };
-        updated[newPanelName] = [];
-        setTempTemplates(updated);
-        setNewPanelName('');
-        setEditingPanel(newPanelName);
-      }
-    };
-
-    const handleDeletePanel = (panelName) => {
-      if (confirm(`Delete "${panelName}" panel? This cannot be undone.`)) {
-        const updated = { ...tempTemplates };
-        delete updated[panelName];
-        setTempTemplates(updated);
-        setLabTemplates(updated);
-      }
-    };
-
-    const handleResetToDefaults = () => {
-      if (confirm('Reset all test panels to default values? This will remove any customizations.')) {
-        setLabTemplates(DEFAULT_LAB_TEMPLATES);
-        setTempTemplates(DEFAULT_LAB_TEMPLATES);
-      }
-    };
-
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md mb-4 max-h-[600px] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">{t('customize')} Lab Test Panels</h3>
-          <button onClick={() => setShowSettings(false)} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Language Selector */}
-        <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Globe size={20} className="text-purple-600" />
-              <span className="font-semibold">{t('language')}</span>
-            </div>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="p-2 border rounded bg-white"
-            >
-              <option value="en">English</option>
-              <option value="th">ภาษาไทย (Thai)</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
-          <p className="text-sm text-blue-800">
-            📝 Customize reference ranges for each test. Different labs may have different normal ranges.
-          </p>
-        </div>
-
-        <div className="mb-6">
-          <h4 className="font-medium mb-2">Add New Test Panel</h4>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Panel name (e.g., 'Custom Panel')"
-              value={newPanelName}
-              onChange={(e) => setNewPanelName(e.target.value)}
-              className="flex-1 p-2 border rounded"
-            />
-            <button
-              onClick={handleAddPanel}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-              Add Panel
+            
+            <!-- Add New Button -->
+            <button id="addNewBtn" class="btn btn-green" onclick="showAddForm()" style="display: none; margin-bottom: 1rem;">
+                <span id="addNewLabel">Add New</span>
             </button>
-          </div>
+            
+            <!-- Content Area -->
+            <div id="contentArea"></div>
         </div>
-
-        <div className="space-y-4">
-          {Object.keys(tempTemplates).map(panelName => (
-            <div key={panelName} className="border rounded-lg p-4">
-              <div className="flex justify-between items-center mb-3">
-                <h4 className="font-semibold text-lg">{panelName}</h4>
-                <div className="flex gap-2">
-                  {editingPanel === panelName ? (
-                    <button
-                      onClick={() => handleSavePanel(panelName)}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      <Save size={20} />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => { setEditingPanel(panelName); setTempTemplates(labTemplates); }}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Edit2 size={20} />
-                    </button>
-                  )}
-                  {!Object.keys(DEFAULT_LAB_TEMPLATES).includes(panelName) && (
-                    <button
-                      onClick={() => handleDeletePanel(panelName)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <X size={20} />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {editingPanel === panelName ? (
-                <div className="space-y-2">
-                  {tempTemplates[panelName].map((test, idx) => (
-                    <div key={idx} className="grid grid-cols-5 gap-2 items-center bg-gray-50 p-2 rounded">
-                      <input
-                        type="text"
-                        value={test.name}
-                        onChange={(e) => handleUpdateTest(panelName, idx, 'name', e.target.value)}
-                        className="p-1 border rounded text-sm"
-                        placeholder="Test name"
-                      />
-                      <input
-                        type="text"
-                        value={test.unit}
-                        onChange={(e) => handleUpdateTest(panelName, idx, 'unit', e.target.value)}
-                        className="p-1 border rounded text-sm"
-                        placeholder="Unit"
-                      />
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={test.refMin}
-                        onChange={(e) => handleUpdateTest(panelName, idx, 'refMin', e.target.value)}
-                        className="p-1 border rounded text-sm"
-                        placeholder="Min"
-                      />
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={test.refMax}
-                        onChange={(e) => handleUpdateTest(panelName, idx, 'refMax', e.target.value)}
-                        className="p-1 border rounded text-sm"
-                        placeholder="Max"
-                      />
-                      <button
-                        onClick={() => handleRemoveTest(panelName, idx)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ))}
-                  
-                  <div className="grid grid-cols-5 gap-2 items-center mt-2">
-                    <input
-                      type="text"
-                      value={newTest.name}
-                      onChange={(e) => setNewTest({...newTest, name: e.target.value})}
-                      className="p-1 border rounded text-sm"
-                      placeholder="Test name"
-                    />
-                    <input
-                      type="text"
-                      value={newTest.unit}
-                      onChange={(e) => setNewTest({...newTest, unit: e.target.value})}
-                      className="p-1 border rounded text-sm"
-                      placeholder="Unit"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={newTest.refMin}
-                      onChange={(e) => setNewTest({...newTest, refMin: e.target.value})}
-                      className="p-1 border rounded text-sm"
-                      placeholder="Min"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={newTest.refMax}
-                      onChange={(e) => setNewTest({...newTest, refMax: e.target.value})}
-                      className="p-1 border rounded text-sm"
-                      placeholder="Max"
-                    />
-                    <button
-                      onClick={() => handleAddTest(panelName)}
-                      className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-sm text-gray-600">
-                  {tempTemplates[panelName].length} tests configured
-                </div>
-              )}
+    </div>
+    
+    <!-- Modals -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Share Dashboard</h3>
+                <button class="close-modal" onclick="closeShareModal()">&times;</button>
             </div>
-          ))}
+            <div class="alert success">
+                <strong>Sharing is now enabled!</strong><br>
+                Anyone with this link can view and edit the health data.
+            </div>
+            <div class="form-group">
+                <label>Share this link with your caregiver:</label>
+                <input type="text" id="shareLink" readonly>
+                <button class="btn btn-blue" onclick="copyShareLink()" style="margin-top: 0.5rem;">Copy Link</button>
+            </div>
+            <div class="alert warning">
+                <strong>Important:</strong> Anyone with this link can access and modify the health data. Only share with trusted caregivers.
+            </div>
         </div>
+    </div>
 
-        <div className="mt-6 pt-4 border-t">
-          <button
-            onClick={() => setShowUnitSettings(!showUnitSettings)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mb-4 flex items-center gap-2"
-          >
-            <RefreshCw size={20} />
-            {showUnitSettings ? 'Hide Unit Settings' : 'Change Units of Measurement'}
-          </button>
+    <script>
+        // State management
+        let currentParent = 'mom';
+        let currentTab = 'dashboard';
+        let labResults = { mom: [], dad: [] };
+        let medications = { mom: [], dad: [] };
+        let appointments = { mom: [], dad: [] };
+        let notes = { mom: [], dad: [] };
+        let sharingEnabled = false;
+        let language = 'en';
+        let labTemplates = {
+            'Complete Blood Count (CBC)': [
+                { name: 'WBC', unit: 'K/uL', refMin: 4.5, refMax: 11.0 },
+                { name: 'RBC', unit: 'M/uL', refMin: 4.5, refMax: 5.9 },
+                { name: 'Hemoglobin', unit: 'g/dL', refMin: 13.5, refMax: 17.5 },
+                { name: 'Hematocrit', unit: '%', refMin: 38.8, refMax: 50.0 },
+                { name: 'Platelets', unit: 'K/uL', refMin: 150, refMax: 400 }
+            ],
+            'Metabolic Panel (CMP)': [
+                { name: 'Glucose', unit: 'mg/dL', refMin: 70, refMax: 100 },
+                { name: 'BUN', unit: 'mg/dL', refMin: 7, refMax: 20 },
+                { name: 'Creatinine', unit: 'mg/dL', refMin: 0.7, refMax: 1.3 },
+                { name: 'eGFR', unit: 'mL/min/1.73m²', refMin: 60, refMax: 120 },
+                { name: 'Sodium', unit: 'mmol/L', refMin: 136, refMax: 145 },
+                { name: 'Potassium', unit: 'mmol/L', refMin: 3.5, refMax: 5.0 }
+            ],
+            'Lipid Panel': [
+                { name: 'Total Cholesterol', unit: 'mg/dL', refMin: 0, refMax: 200 },
+                { name: 'LDL Cholesterol', unit: 'mg/dL', refMin: 0, refMax: 100 },
+                { name: 'HDL Cholesterol', unit: 'mg/dL', refMin: 40, refMax: 999 },
+                { name: 'Triglycerides', unit: 'mg/dL', refMin: 0, refMax: 150 }
+            ],
+            'Thyroid Function': [
+                { name: 'TSH', unit: 'mIU/L', refMin: 0.4, refMax: 4.0 },
+                { name: 'Free T4', unit: 'ng/dL', refMin: 0.8, refMax: 1.8 },
+                { name: 'Free T3', unit: 'pg/mL', refMin: 2.3, refMax: 4.2 }
+            ],
+            'Kidney Function Panel': [
+                { name: 'Creatinine', unit: 'mg/dL', refMin: 0.7, refMax: 1.3 },
+                { name: 'BUN', unit: 'mg/dL', refMin: 7, refMax: 20 },
+                { name: 'eGFR', unit: 'mL/min/1.73m²', refMin: 60, refMax: 120 },
+                { name: 'BUN/Creatinine Ratio', unit: 'ratio', refMin: 10, refMax: 20 },
+                { name: 'Albumin', unit: 'g/dL', refMin: 3.5, refMax: 5.5 },
+                { name: 'Uric Acid', unit: 'mg/dL', refMin: 3.5, refMax: 7.2 }
+            ]
+        };
 
-          {showUnitSettings && (
-            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
-              <h4 className="font-semibold mb-3">Unit Preferences</h4>
-              <p className="text-sm text-gray-600 mb-4">
-                Change how test results are displayed. Values will be automatically converted.
-              </p>
-              <div className="space-y-3">
-                {testsWithConversions.map(testName => {
-                  const availableUnits = getAvailableUnits(testName);
-                  const currentUnit = unitPreferences[testName] || availableUnits[0];
-                  
-                  return (
-                    <div key={testName} className="flex items-center justify-between bg-white p-3 rounded">
-                      <span className="font-medium">{testName}</span>
-                      <select
-                        value={currentUnit}
-                        onChange={(e) => setUnitPreferences({
-                          ...unitPreferences,
-                          [testName]: e.target.value
-                        })}
-                        className="p-2 border rounded"
-                      >
-                        {availableUnits.map(unit => (
-                          <option key={unit} value={unit}>{unit}</option>
-                        ))}
-                      </select>
+        const translations = {
+            en: {
+                appTitle: "Parent Health Tracker",
+                appSubtitle: "Comprehensive lab results and health monitoring",
+                dashboard: "Dashboard",
+                labResults: "Lab Results",
+                medications: "Medications",
+                appointments: "Appointments",
+                notes: "Notes",
+                mom: "Mom",
+                dad: "Dad",
+                addNew: "Add New",
+                export: "Export",
+                customize: "Customize",
+                enableSharing: "Enable Sharing",
+                sharingEnabled: "Sharing Enabled",
+                totalLabTests: "Total Lab Tests",
+                activeMedications: "Active Medications",
+                upcomingAppointments: "Upcoming Appointments",
+                abnormalValues: "Abnormal Values",
+                allNormal: "All normal",
+                needsAttention: "Needs attention",
+                last: "Last",
+                currentlyTaking: "Currently taking",
+                next: "Next"
+            },
+            th: {
+                appTitle: "ติดตามสุขภาพพ่อแม่",
+                appSubtitle: "ติดตามผลแลปและสุขภาพอย่างครบถ้วน",
+                dashboard: "แดชบอร์ด",
+                labResults: "ผลแลป",
+                medications: "ยา",
+                appointments: "นัดหมาย",
+                notes: "บันทึก",
+                mom: "แม่",
+                dad: "พ่อ",
+                addNew: "เพิ่มใหม่",
+                export: "ส่งออก",
+                customize: "ปรับแต่ง",
+                enableSharing: "เปิดการแชร์",
+                sharingEnabled: "กำลังแชร์",
+                totalLabTests: "ตรวจแลปทั้งหมด",
+                activeMedications: "ยาที่ใช้อยู่",
+                upcomingAppointments: "นัดหมายที่จะถึง",
+                abnormalValues: "ค่าผิดปกติ",
+                allNormal: "ปกติทั้งหมด",
+                needsAttention: "ต้องดูแล",
+                last: "ล่าสุด",
+                currentlyTaking: "กำลังใช้",
+                next: "ถัดไป"
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            updateUI();
+        });
+
+        // Translation helper
+        function t(key) {
+            return translations[language][key] || key;
+        }
+
+        function updateTranslations() {
+            document.getElementById('appTitle').textContent = t('appTitle');
+            document.getElementById('appSubtitle').textContent = t('appSubtitle');
+            document.getElementById('dashboardLabel').textContent = t('dashboard');
+            document.getElementById('labResultsLabel').textContent = t('labResults');
+            document.getElementById('medicationsLabel').textContent = t('medications');
+            document.getElementById('appointmentsLabel').textContent = t('appointments');
+            document.getElementById('notesLabel').textContent = t('notes');
+            document.getElementById('momLabel').textContent = t('mom');
+            document.getElementById('dadLabel').textContent = t('dad');
+            document.getElementById('addNewLabel').textContent = t('addNew');
+            document.getElementById('exportBtn').textContent = t('export');
+            document.getElementById('customizeBtn').textContent = t('customize');
+            document.getElementById('sharingBtn').textContent = sharingEnabled ? t('sharingEnabled') : t('enableSharing');
+        }
+
+        // Storage functions
+        async function loadData() {
+            try {
+                if (typeof window.storage !== 'undefined') {
+                    const sharingResult = await window.storage.get('sharing-enabled', true);
+                    sharingEnabled = sharingResult?.value === 'true';
+
+                    const labsResult = await window.storage.get('lab-results', sharingEnabled);
+                    const medsResult = await window.storage.get('medications', sharingEnabled);
+                    const aptsResult = await window.storage.get('appointments', sharingEnabled);
+                    const notesResult = await window.storage.get('notes', sharingEnabled);
+                    const langResult = await window.storage.get('language', sharingEnabled);
+
+                    if (labsResult?.value) labResults = JSON.parse(labsResult.value);
+                    if (medsResult?.value) medications = JSON.parse(medsResult.value);
+                    if (aptsResult?.value) appointments = JSON.parse(aptsResult.value);
+                    if (notesResult?.value) notes = JSON.parse(notesResult.value);
+                    if (langResult?.value) language = langResult.value;
+                } else {
+                    // Fallback to localStorage
+                    const savedData = localStorage.getItem('healthTrackerData');
+                    if (savedData) {
+                        const data = JSON.parse(savedData);
+                        labResults = data.labResults || labResults;
+                        medications = data.medications || medications;
+                        appointments = data.appointments || appointments;
+                        notes = data.notes || notes;
+                        sharingEnabled = data.sharingEnabled || false;
+                        language = data.language || 'en';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+            updateTranslations();
+            updateUI();
+        }
+
+        async function saveData() {
+            try {
+                if (typeof window.storage !== 'undefined') {
+                    await window.storage.set('lab-results', JSON.stringify(labResults), sharingEnabled);
+                    await window.storage.set('medications', JSON.stringify(medications), sharingEnabled);
+                    await window.storage.set('appointments', JSON.stringify(appointments), sharingEnabled);
+                    await window.storage.set('notes', JSON.stringify(notes), sharingEnabled);
+                    await window.storage.set('language', language, sharingEnabled);
+                    await window.storage.set('sharing-enabled', String(sharingEnabled), true);
+                } else {
+                    // Fallback to localStorage
+                    const data = {
+                        labResults,
+                        medications,
+                        appointments,
+                        notes,
+                        sharingEnabled,
+                        language
+                    };
+                    localStorage.setItem('healthTrackerData', JSON.stringify(data));
+                }
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        }
+
+        // UI Functions
+        function selectParent(parent) {
+            currentParent = parent;
+            document.getElementById('momBtn').className = parent === 'mom' ? 'parent-btn mom' : 'parent-btn inactive';
+            document.getElementById('dadBtn').className = parent === 'dad' ? 'parent-btn dad' : 'parent-btn inactive';
+            updateUI();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
+            
+            const addBtn = document.getElementById('addNewBtn');
+            if (tab !== 'dashboard') {
+                addBtn.style.display = 'block';
+            } else {
+                addBtn.style.display = 'none';
+            }
+            
+            updateUI();
+        }
+
+        function updateUI() {
+            const contentArea = document.getElementById('contentArea');
+            
+            switch(currentTab) {
+                case 'dashboard':
+                    showDashboard();
+                    break;
+                case 'labs':
+                    showLabResults();
+                    break;
+                case 'medications':
+                    showMedications();
+                    break;
+                case 'appointments':
+                    showAppointments();
+                    break;
+                case 'notes':
+                    showNotes();
+                    break;
+            }
+            
+            // Update sharing status
+            if (sharingEnabled) {
+                document.getElementById('sharingAlert').style.display = 'block';
+                document.getElementById('sharingBtn').textContent = t('sharingEnabled');
+            } else {
+                document.getElementById('sharingAlert').style.display = 'none';
+                document.getElementById('sharingBtn').textContent = t('enableSharing');
+            }
+        }
+
+        function showDashboard() {
+            const labs = labResults[currentParent];
+            const meds = medications[currentParent];
+            const apts = appointments[currentParent].filter(apt => new Date(apt.date) >= new Date());
+            
+            // Count abnormal values
+            let abnormalCount = 0;
+            labs.forEach(lab => {
+                lab.results.forEach(result => {
+                    if (result.value < result.refMin || result.value > result.refMax) {
+                        abnormalCount++;
+                    }
+                });
+            });
+            
+            const latestLab = labs.length > 0 ? 
+                labs.sort((a, b) => new Date(b.date) - new Date(a.date))[0] : null;
+            const nextApt = apts.length > 0 ? 
+                apts.sort((a, b) => new Date(a.date) - new Date(b.date))[0] : null;
+            
+            let html = `
+                <div class="dashboard-grid">
+                    <div class="metric-card blue">
+                        <div class="metric-label">${t('totalLabTests')}</div>
+                        <div class="metric-value">${labs.length}</div>
+                        <div class="metric-info">${latestLab ? `${t('last')}: ${latestLab.date}` : ''}</div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          <button
-            onClick={() => setShowRangeSettings(!showRangeSettings)}
-            className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 mb-4 flex items-center gap-2"
-          >
-            <Edit2 size={20} />
-            {showRangeSettings ? 'Hide Reference Range Settings' : 'Customize Reference Ranges'}
-          </button>
-
-          {showRangeSettings && (
-            <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
-              <h4 className="font-semibold mb-3">{t('customReferenceRanges')}</h4>
-              <p className="text-sm text-gray-600 mb-2">
-                Override default reference ranges for <strong>{selectedParent === 'mom' ? t('mom') : t('dad')}</strong>.
-              </p>
-              <p className="text-sm text-gray-600 mb-4">
-                Each parent can have different reference ranges (e.g., different by age or gender).
-              </p>
-              {testsForRangeCustomization.length === 0 ? (
-                <div className="text-center text-gray-500 py-4">
-                  Add some lab results first to customize their reference ranges
+                    <div class="metric-card green">
+                        <div class="metric-label">${t('activeMedications')}</div>
+                        <div class="metric-value">${meds.length}</div>
+                        <div class="metric-info">${t('currentlyTaking')}</div>
+                    </div>
+                    <div class="metric-card purple">
+                        <div class="metric-label">${t('upcomingAppointments')}</div>
+                        <div class="metric-value">${apts.length}</div>
+                        <div class="metric-info">${nextApt ? `${t('next')}: ${new Date(nextApt.date).toLocaleDateString()}` : ''}</div>
+                    </div>
+                    <div class="metric-card ${abnormalCount > 0 ? 'red' : 'green'}">
+                        <div class="metric-label">${t('abnormalValues')}</div>
+                        <div class="metric-value">${abnormalCount}</div>
+                        <div class="metric-info">${abnormalCount === 0 ? t('allNormal') : t('needsAttention')}</div>
+                    </div>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {testsForRangeCustomization.map(testKey => {
-                    const [testName, unit] = testKey.split('-');
-                    const customRange = parentRanges[testKey];
+            `;
+            
+            // Show latest results if available
+            if (latestLab) {
+                html += `<h3 style="margin-top: 2rem;">Latest Test Results - ${latestLab.testType}</h3>`;
+                html += `<div class="lab-results-grid">`;
+                latestLab.results.forEach(result => {
+                    const status = result.value < result.refMin ? 'low' : 
+                                  result.value > result.refMax ? 'high' : 'normal';
+                    const statusText = status === 'normal' ? '✓ Normal' : 
+                                      status === 'low' ? '↓ Low' : '↑ High';
                     
-                    // Find original range from lab results
-                    let originalMin = '', originalMax = '';
-                    labResults[selectedParent].forEach(lab => {
-                      lab.results.forEach(r => {
-                        if (r.name === testName) {
-                          const converted = convertResult(r);
-                          if (converted.unit === unit && !customRange) {
-                            originalMin = converted.refMin;
-                            originalMax = converted.refMax;
-                          }
-                        }
-                      });
+                    html += `
+                        <div class="test-result ${status}">
+                            <div class="test-name">${result.name}</div>
+                            <div class="test-value">${result.value}</div>
+                            <div class="test-unit">${result.unit}</div>
+                            <div class="test-status ${status}">${statusText}</div>
+                            <div class="test-range">Normal: ${result.refMin}-${result.refMax}</div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function showLabResults() {
+            const labs = labResults[currentParent];
+            let html = '';
+            
+            if (labs.length === 0) {
+                html = '<div class="empty-state">No lab results yet</div>';
+            } else {
+                labs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                labs.forEach(lab => {
+                    html += `
+                        <div class="lab-result-card">
+                            <div class="lab-result-header">
+                                <div>
+                                    <div class="lab-result-title">${lab.testType}</div>
+                                    <div class="lab-result-date">${lab.date}</div>
+                                </div>
+                                <button class="delete-btn" onclick="deleteLabResult(${lab.id})">×</button>
+                            </div>
+                            <div class="lab-results-grid">
+                    `;
+                    
+                    lab.results.forEach(result => {
+                        const status = result.value < result.refMin ? 'low' : 
+                                      result.value > result.refMax ? 'high' : 'normal';
+                        const statusText = status === 'normal' ? '✓ Normal' : 
+                                          status === 'low' ? '↓ Low' : '↑ High';
+                        
+                        html += `
+                            <div class="test-result ${status}">
+                                <div class="test-name">${result.name}</div>
+                                <div class="test-value">${result.value}</div>
+                                <div class="test-unit">${result.unit}</div>
+                                <div class="test-status ${status}">${statusText}</div>
+                                <div class="test-range">Normal: ${result.refMin}-${result.refMax}</div>
+                            </div>
+                        `;
                     });
                     
-                    return (
-                      <div key={testKey} className="bg-white p-4 rounded border">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <div className="font-medium text-gray-900">{testName}</div>
-                            <div className="text-sm text-gray-600">Unit: {unit}</div>
-                            {!customRange && originalMin && (
-                              <div className="text-xs text-gray-500">
-                                Default: {originalMin} - {originalMax}
-                              </div>
-                            )}
-                          </div>
-                          {customRange && (
-                            <button
-                              onClick={() => {
-                                const updated = { ...customRanges };
-                                delete updated[selectedParent][testKey];
-                                setCustomRanges(updated);
-                              }}
-                              className="text-red-600 hover:text-red-800 text-sm"
-                            >
-                              {t('resetToDefault')}
-                            </button>
-                          )}
+                    html += `
+                            </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium mb-1 text-gray-700">
-                              {t('minimum')}
-                            </label>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={customRange?.min ?? originalMin}
-                              onChange={(e) => {
-                                const val = parseFloat(e.target.value);
-                                if (!isNaN(val)) {
-                                  setCustomRanges({
-                                    ...customRanges,
-                                    [selectedParent]: {
-                                      ...parentRanges,
-                                      [testKey]: {
-                                        ...parentRanges[testKey],
-                                        min: val,
-                                        max: parentRanges[testKey]?.max ?? originalMax
-                                      }
-                                    }
-                                  });
-                                }
-                              }}
-                              className="w-full p-2 border rounded"
-                              placeholder="Min value"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium mb-1 text-gray-700">
-                              {t('maximum')}
-                            </label>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={customRange?.max ?? originalMax}
-                              onChange={(e) => {
-                                const val = parseFloat(e.target.value);
-                                if (!isNaN(val)) {
-                                  setCustomRanges({
-                                    ...customRanges,
-                                    [selectedParent]: {
-                                      ...parentRanges,
-                                      [testKey]: {
-                                        min: parentRanges[testKey]?.min ?? originalMin,
-                                        max: val
-                                      }
-                                    }
-                                  });
-                                }
-                              }}
-                              className="w-full p-2 border rounded"
-                              placeholder="Max value"
-                            />
-                          </div>
-                        </div>
-                        {customRange && (
-                          <div className="mt-2 text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded">
-                            ✓ Custom range active: {customRange.min} - {customRange.max} {unit}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="mt-6 pt-4 border-t">
-          <button
-            onClick={handleResetToDefaults}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          >
-            Reset All to Defaults
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const LabResultForm = () => {
-    const [selectedTest, setSelectedTest] = useState(Object.keys(labTemplates)[0]);
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [results, setResults] = useState({});
-
-    useEffect(() => {
-      const template = labTemplates[selectedTest];
-      const initialResults = {};
-      template.forEach(test => {
-        initialResults[test.name] = { ...test, value: '' };
-      });
-      setResults(initialResults);
-    }, [selectedTest]);
-
-    const handleSubmit = () => {
-      const resultsArray = Object.values(results).filter(r => r.value !== '');
-      if (resultsArray.length > 0) {
-        addLabResult({
-          date,
-          testType: selectedTest,
-          results: resultsArray
-        });
-        setShowForm(false);
-      }
-    };
-
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md mb-4">
-        <h3 className="text-lg font-semibold mb-4">Add Lab Results</h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Test Type</label>
-              <select
-                value={selectedTest}
-                onChange={(e) => setSelectedTest(e.target.value)}
-                className="w-full p-2 border rounded"
-              >
-                {Object.keys(labTemplates).map(test => (
-                  <option key={test} value={test}>{test}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          
-          <div className="border-t pt-4">
-            <h4 className="font-medium mb-3">Enter Results</h4>
-            <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
-              {Object.values(results).map((test) => (
-                <div key={test.name} className="flex items-center gap-3 bg-gray-50 p-3 rounded">
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">{test.name}</div>
-                    <div className="text-xs text-gray-500">
-                      Ref: {test.refMin} - {test.refMax} {test.unit}
-                    </div>
-                  </div>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Value"
-                    value={test.value}
-                    onChange={(e) => setResults({
-                      ...results,
-                      [test.name]: { ...test, value: parseFloat(e.target.value) || '' }
-                    })}
-                    className="w-24 p-2 border rounded"
-                  />
-                  <span className="text-sm text-gray-600 w-16">{test.unit}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-2 mt-4">
-          <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Save
-          </button>
-          <button onClick={() => setShowForm(false)} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const Dashboard = () => {
-    const currentLabs = labResults[selectedParent];
-    const currentMeds = medications[selectedParent];
-    const upcomingApts = appointments[selectedParent]
-      .filter(apt => new Date(apt.date) >= new Date())
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    // Get latest results summary
-    const latestResults = currentLabs.length > 0 
-      ? currentLabs.sort((a, b) => new Date(b.date) - new Date(a.date))[0]
-      : null;
-
-    // Get all abnormal values with details
-    const abnormalValues = [];
-    currentLabs.forEach(lab => {
-      lab.results.forEach(result => {
-        const converted = convertResult(result);
-        if (converted.value < converted.refMin || converted.value > converted.refMax) {
-          abnormalValues.push({
-            date: lab.date,
-            testType: lab.testType,
-            name: converted.name,
-            value: converted.value,
-            unit: converted.unit,
-            refMin: converted.refMin,
-            refMax: converted.refMax,
-            status: converted.value < converted.refMin ? 'Low' : 'High'
-          });
-        }
-      });
-    });
-
-    // Count abnormal values
-    const abnormalCount = abnormalValues.length;
-
-    // Get kidney function indicators
-    const kidneyTests = ['Creatinine', 'BUN', 'eGFR', 'BUN/Creatinine Ratio', 'Albumin/Creatinine Ratio', 'Uric Acid', 'Cystatin C'];
-    const latestKidneyResults = [];
-    kidneyTests.forEach(testName => {
-      let latest = null;
-      let latestDate = null;
-      currentLabs.forEach(lab => {
-        lab.results.forEach(result => {
-          if (result.name === testName) {
-            const labDate = new Date(lab.date);
-            if (!latestDate || labDate > latestDate) {
-              latestDate = labDate;
-              latest = convertResult(result);
+                    `;
+                });
             }
-          }
-        });
-      });
-      if (latest) {
-        latestKidneyResults.push(latest);
-      }
-    });
-
-    // Calculate kidney health score (0-100, higher is better)
-    let kidneyScore = 100;
-    let kidneyIssues = [];
-    latestKidneyResults.forEach(result => {
-      if (result.value < result.refMin || result.value > result.refMax) {
-        // Critical kidney markers
-        if (result.name === 'eGFR' && result.value < 60) {
-          kidneyScore -= 30;
-          kidneyIssues.push(`Low eGFR (${result.value})`);
-        } else if (result.name === 'Creatinine' && result.value > 1.5) {
-          kidneyScore -= 20;
-          kidneyIssues.push(`High Creatinine (${result.value})`);
-        } else if (result.name === 'Albumin/Creatinine Ratio' && result.value > 30) {
-          kidneyScore -= 15;
-          kidneyIssues.push(`Elevated ACR (${result.value})`);
-        } else {
-          kidneyScore -= 10;
+            
+            document.getElementById('contentArea').innerHTML = html;
         }
-      }
-    });
-    kidneyScore = Math.max(0, kidneyScore);
-    const hasKidneyData = latestKidneyResults.length > 0;
 
-    // Get key metrics for charting
-    const getMetricData = (testName) => {
-      return currentLabs
-        .flatMap(lab => lab.results
-          .filter(r => r.name === testName)
-          .map(r => {
-            const converted = convertResult(r);
-            return {
-              date: lab.date,
-              value: converted.value,
-              refMin: converted.refMin,
-              refMax: converted.refMax,
-              unit: converted.unit
-            };
-          })
-        )
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-    };
+        function showMedications() {
+            const meds = medications[currentParent];
+            let html = '';
+            
+            if (meds.length === 0) {
+                html = '<div class="empty-state">No medications added yet</div>';
+            } else {
+                meds.forEach(med => {
+                    html += `
+                        <div class="medication-card">
+                            <button class="delete-btn" onclick="deleteMedication(${med.id})">×</button>
+                            <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${med.name}</div>
+                            <div style="color: #4b5563;">${med.dosage} - ${med.frequency}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Take at ${med.time}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
 
-    // Find common tests across all results
-    const allTests = new Set();
-    currentLabs.forEach(lab => {
-      lab.results.forEach(r => allTests.add(r.name));
-    });
-    
-    const commonTests = Array.from(allTests).filter(testName => {
-      const data = getMetricData(testName);
-      return data.length >= 2; // Only show tests with 2+ readings
-    }).slice(0, 6); // Show max 6 charts
+        function showAppointments() {
+            const apts = appointments[currentParent];
+            let html = '';
+            
+            if (apts.length === 0) {
+                html = '<div class="empty-state">No appointments scheduled</div>';
+            } else {
+                apts.forEach(apt => {
+                    html += `
+                        <div class="appointment-card">
+                            <button class="delete-btn" onclick="deleteAppointment(${apt.id})">×</button>
+                            <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${apt.type}</div>
+                            <div style="color: #4b5563;">with ${apt.doctor}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">${apt.date}</div>
+                            ${apt.notes ? `<div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">${apt.notes}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
 
-    return (
-      <div className="space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
-            <div className="text-sm text-blue-600 font-medium">Total Lab Tests</div>
-            <div className="text-3xl font-bold text-blue-900 mt-1">{currentLabs.length}</div>
-            <div className="text-xs text-blue-600 mt-1">
-              {latestResults && `Last: ${latestResults.date}`}
-            </div>
-          </div>
+        function showNotes() {
+            const notesList = notes[currentParent];
+            let html = '';
+            
+            if (notesList.length === 0) {
+                html = '<div class="empty-state">No notes added yet</div>';
+            } else {
+                notesList.forEach(note => {
+                    html += `
+                        <div class="note-card">
+                            <button class="delete-btn" onclick="deleteNote(${note.id})">×</button>
+                            <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${note.title}</div>
+                            <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; padding: 0.125rem 0.5rem; border-radius: 0.25rem;">${note.category}</span>
+                            <div style="color: #4b5563; margin-top: 0.5rem;">${note.content}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">${new Date(note.timestamp).toLocaleString()}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
 
-          <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
-            <div className="text-sm text-green-600 font-medium">Active Medications</div>
-            <div className="text-3xl font-bold text-green-900 mt-1">{currentMeds.length}</div>
-            <div className="text-xs text-green-600 mt-1">Currently taking</div>
-          </div>
+        // Add forms
+        function showAddForm() {
+            const contentArea = document.getElementById('contentArea');
+            
+            switch(currentTab) {
+                case 'labs':
+                    showLabForm();
+                    break;
+                case 'medications':
+                    showMedicationForm();
+                    break;
+                case 'appointments':
+                    showAppointmentForm();
+                    break;
+                case 'notes':
+                    showNoteForm();
+                    break;
+            }
+        }
 
-          <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-lg">
-            <div className="text-sm text-purple-600 font-medium">Upcoming Appointments</div>
-            <div className="text-3xl font-bold text-purple-900 mt-1">{upcomingApts.length}</div>
-            <div className="text-xs text-purple-600 mt-1">
-              {upcomingApts[0] && `Next: ${new Date(upcomingApts[0].date).toLocaleDateString()}`}
-            </div>
-          </div>
-
-          <div className={`border-l-4 p-4 rounded-lg ${
-            abnormalCount > 0 
-              ? 'bg-red-50 border-red-500' 
-              : 'bg-green-50 border-green-500'
-          }`}>
-            <div className={`text-sm font-medium ${
-              abnormalCount > 0 ? 'text-red-600' : 'text-green-600'
-            }`}>
-              Abnormal Values
-            </div>
-            <div className={`text-3xl font-bold mt-1 ${
-              abnormalCount > 0 ? 'text-red-900' : 'text-green-900'
-            }`}>
-              {abnormalCount}
-            </div>
-            <div className={`text-xs mt-1 ${
-              abnormalCount > 0 ? 'text-red-600' : 'text-green-600'
-            }`}>
-              {abnormalCount === 0 ? 'All normal' : 'Needs attention'}
-            </div>
-          </div>
-        </div>
-
-        {/* Kidney Health Indicator */}
-        {hasKidneyData && (
-          <div className={`p-6 rounded-lg shadow border-l-4 ${
-            kidneyScore >= 80 ? 'bg-green-50 border-green-500' :
-            kidneyScore >= 60 ? 'bg-yellow-50 border-yellow-500' :
-            'bg-red-50 border-red-500'
-          }`}>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <Activity className={
-                    kidneyScore >= 80 ? 'text-green-600' :
-                    kidneyScore >= 60 ? 'text-yellow-600' :
-                    'text-red-600'
-                  } size={28} />
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Kidney Function Status</h3>
-                    <div className="text-sm text-gray-600">Based on {latestKidneyResults.length} kidney test{latestKidneyResults.length > 1 ? 's' : ''}</div>
-                  </div>
+        function showLabForm() {
+            const testTypes = Object.keys(labTemplates);
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Add Lab Results</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="labDate" value="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div class="form-group">
+                            <label>Test Type</label>
+                            <select id="labTestType" onchange="updateLabTestFields()">
+                                ${testTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div id="labTestFields" style="margin-top: 1rem;"></div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="saveLabResult()">Save</button>
+                        <button class="btn btn-gray" onclick="updateUI()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
                 </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+            updateLabTestFields();
+        }
+
+        function updateLabTestFields() {
+            const testType = document.getElementById('labTestType').value;
+            const template = labTemplates[testType];
+            let html = '<h4 style="margin-bottom: 0.5rem;">Enter Results</h4>';
+            
+            template.forEach((test, index) => {
+                html += `
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding: 0.75rem; background: #f3f4f6; border-radius: 0.25rem;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; font-size: 0.875rem;">${test.name}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Ref: ${test.refMin} - ${test.refMax} ${test.unit}</div>
+                        </div>
+                        <input type="number" step="0.01" id="labValue_${index}" placeholder="Value" style="width: 100px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                        <span style="font-size: 0.875rem; color: #6b7280; width: 60px;">${test.unit}</span>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('labTestFields').innerHTML = html;
+        }
+
+        function saveLabResult() {
+            const date = document.getElementById('labDate').value;
+            const testType = document.getElementById('labTestType').value;
+            const template = labTemplates[testType];
+            const results = [];
+            
+            template.forEach((test, index) => {
+                const value = parseFloat(document.getElementById(`labValue_${index}`).value);
+                if (!isNaN(value)) {
+                    results.push({
+                        name: test.name,
+                        value: value,
+                        unit: test.unit,
+                        refMin: test.refMin,
+                        refMax: test.refMax
+                    });
+                }
+            });
+            
+            if (results.length > 0) {
+                const newLab = {
+                    id: Date.now(),
+                    date: date,
+                    testType: testType,
+                    results: results
+                };
                 
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Health Score</span>
-                    <span className={`text-2xl font-bold ${
-                      kidneyScore >= 80 ? 'text-green-700' :
-                      kidneyScore >= 60 ? 'text-yellow-700' :
-                      'text-red-700'
-                    }`}>
-                      {kidneyScore}/100
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div 
-                      className={`h-3 rounded-full transition-all ${
-                        kidneyScore >= 80 ? 'bg-green-500' :
-                        kidneyScore >= 60 ? 'bg-yellow-500' :
-                        'bg-red-500'
-                      }`}
-                      style={{ width: `${kidneyScore}%` }}
-                    />
-                  </div>
-                </div>
+                labResults[currentParent].push(newLab);
+                saveData();
+                updateUI();
+            }
+        }
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {latestKidneyResults.map((result, idx) => {
-                    const isLow = result.value < result.refMin;
-                    const isHigh = result.value > result.refMax;
-                    const isNormal = !isLow && !isHigh;
+        function showMedicationForm() {
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Add Medication</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Medication Name</label>
+                            <input type="text" id="medName">
+                        </div>
+                        <div class="form-group">
+                            <label>Dosage</label>
+                            <input type="text" id="medDosage" placeholder="e.g., 10mg">
+                        </div>
+                        <div class="form-group">
+                            <label>Frequency</label>
+                            <select id="medFrequency">
+                                <option>Once daily</option>
+                                <option>Twice daily</option>
+                                <option>Three times daily</option>
+                                <option>As needed</option>
+                                <option>Weekly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="medTime" value="08:00">
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="saveMedication()">Save</button>
+                        <button class="btn btn-gray" onclick="updateUI()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function saveMedication() {
+            const name = document.getElementById('medName').value;
+            const dosage = document.getElementById('medDosage').value;
+            const frequency = document.getElementById('medFrequency').value;
+            const time = document.getElementById('medTime').value;
+            
+            if (name && dosage) {
+                const newMed = {
+                    id: Date.now(),
+                    name: name,
+                    dosage: dosage,
+                    frequency: frequency,
+                    time: time
+                };
+                
+                medications[currentParent].push(newMed);
+                saveData();
+                updateUI();
+            }
+        }
+
+        function showAppointmentForm() {
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Add Appointment</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Date & Time</label>
+                            <input type="datetime-local" id="aptDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Doctor</label>
+                            <input type="text" id="aptDoctor">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Appointment Type</label>
+                            <input type="text" id="aptType" placeholder="e.g., Cardiology, General Checkup">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Notes</label>
+                            <textarea id="aptNotes" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="saveAppointment()">Save</button>
+                        <button class="btn btn-gray" onclick="updateUI()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function saveAppointment() {
+            const date = document.getElementById('aptDate').value;
+            const doctor = document.getElementById('aptDoctor').value;
+            const type = document.getElementById('aptType').value;
+            const notes = document.getElementById('aptNotes').value;
+            
+            if (date && doctor && type) {
+                const newApt = {
+                    id: Date.now(),
+                    date: date,
+                    doctor: doctor,
+                    type: type,
+                    notes: notes
+                };
+                
+                appointments[currentParent].push(newApt);
+                saveData();
+                updateUI();
+            }
+        }
+
+        function showNoteForm() {
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Add Note</h3>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="noteTitle">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="noteCategory">
+                            <option>General</option>
+                            <option>Symptoms</option>
+                            <option>Diet</option>
+                            <option>Exercise</option>
+                            <option>Concerns</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Content</label>
+                        <textarea id="noteContent" rows="4"></textarea>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="saveNote()">Save</button>
+                        <button class="btn btn-gray" onclick="updateUI()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function saveNote() {
+            const title = document.getElementById('noteTitle').value;
+            const category = document.getElementById('noteCategory').value;
+            const content = document.getElementById('noteContent').value;
+            
+            if (title && content) {
+                const newNote = {
+                    id: Date.now(),
+                    title: title,
+                    category: category,
+                    content: content,
+                    timestamp: new Date().toISOString()
+                };
+                
+                notes[currentParent].push(newNote);
+                saveData();
+                updateUI();
+            }
+        }
+
+        // Delete functions
+        function deleteLabResult(id) {
+            labResults[currentParent] = labResults[currentParent].filter(l => l.id !== id);
+            saveData();
+            updateUI();
+        }
+
+        function deleteMedication(id) {
+            medications[currentParent] = medications[currentParent].filter(m => m.id !== id);
+            saveData();
+            updateUI();
+        }
+
+        function deleteAppointment(id) {
+            appointments[currentParent] = appointments[currentParent].filter(a => a.id !== id);
+            saveData();
+            updateUI();
+        }
+
+        function deleteNote(id) {
+            notes[currentParent] = notes[currentParent].filter(n => n.id !== id);
+            saveData();
+            updateUI();
+        }
+
+        // Settings
+        function showSettings() {
+            let html = `
+                <div class="settings-panel">
+                    <h3 style="margin-bottom: 1rem;">Settings</h3>
                     
-                    return (
-                      <div key={idx} className={`p-3 rounded border ${
-                        isNormal ? 'bg-white border-green-300' :
-                        isLow ? 'bg-blue-50 border-blue-300' :
-                        'bg-red-50 border-red-300'
-                      }`}>
-                        <div className="text-xs font-medium text-gray-700">{result.name}</div>
-                        <div className={`text-lg font-bold ${
-                          isNormal ? 'text-green-700' :
-                          isLow ? 'text-blue-700' :
-                          'text-red-700'
-                        }`}>
-                          {result.value}
-                        </div>
-                        <div className="text-xs text-gray-600">{result.unit}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {kidneyIssues.length > 0 && (
-                  <div className="mt-4 p-3 bg-white rounded border border-orange-300">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="text-orange-600 mt-0.5" size={16} />
-                      <div>
-                        <div className="font-semibold text-orange-900 text-sm">Areas of Concern:</div>
-                        <ul className="text-sm text-orange-800 mt-1 space-y-1">
-                          {kidneyIssues.map((issue, idx) => (
-                            <li key={idx}>• {issue}</li>
-                          ))}
-                        </ul>
-                      </div>
+                    <div class="settings-section">
+                        <h4 style="margin-bottom: 0.5rem;">Language</h4>
+                        <select onchange="changeLanguage(this.value)" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                            <option value="en" ${language === 'en' ? 'selected' : ''}>English</option>
+                            <option value="th" ${language === 'th' ? 'selected' : ''}>ภาษาไทย (Thai)</option>
+                        </select>
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Abnormal Values Alert Section */}
-        {abnormalValues.length > 0 && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle className="text-red-600" size={24} />
-              <h3 className="text-lg font-semibold text-red-900">
-                {abnormalValues.length} Value{abnormalValues.length > 1 ? 's' : ''} Out of Range
-              </h3>
-            </div>
-            <div className="space-y-2">
-              {abnormalValues.slice(0, 10).map((item, idx) => (
-                <div key={idx} className="bg-white p-3 rounded flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900">{item.name}</span>
-                      <span className={`text-xs px-2 py-1 rounded font-medium ${
-                        item.status === 'Low' 
-                          ? 'bg-blue-100 text-blue-700' 
-                          : 'bg-red-100 text-red-700'
-                      }`}>
-                        {item.status}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      Value: <span className="font-medium">{item.value} {item.unit}</span> | 
-                      Normal: {item.refMin}-{item.refMax} {item.unit}
-                    </div>
-                    <div className="text-xs text-gray-500">{item.testType} • {item.date}</div>
-                  </div>
-                  <AlertCircle className={item.status === 'Low' ? 'text-blue-500' : 'text-red-500'} size={20} />
-                </div>
-              ))}
-              {abnormalValues.length > 10 && (
-                <div className="text-sm text-gray-600 text-center pt-2">
-                  Showing 10 of {abnormalValues.length} abnormal values
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Latest Results */}
-        {latestResults && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Latest Test Results - {latestResults.testType}</h3>
-            <div className="text-sm text-gray-600 mb-4">Date: {latestResults.date}</div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {latestResults.results.slice(0, 8).map((result, idx) => {
-                const converted = convertResult(result);
-                const isLow = converted.value < converted.refMin;
-                const isHigh = converted.value > converted.refMax;
-                const isNormal = !isLow && !isHigh;
-                
-                return (
-                  <div key={idx} className={`p-3 rounded-lg border-2 shadow-sm ${
-                    isNormal ? 'bg-green-50 border-green-400' : 
-                    isLow ? 'bg-blue-50 border-blue-400' : 
-                    'bg-red-50 border-red-400'
-                  }`}>
-                    <div className="flex justify-between items-start mb-1">
-                      <div className="font-medium text-sm text-gray-900">{converted.name}</div>
-                      {isNormal ? (
-                        <CheckCircle className="text-green-600" size={16} />
-                      ) : (
-                        <AlertCircle className={isLow ? 'text-blue-600' : 'text-red-600'} size={16} />
-                      )}
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">
-                      {converted.value}
-                    </div>
-                    <div className="text-xs text-gray-700 font-medium mb-1">{converted.unit}</div>
-                    <div className={`text-xs font-medium px-2 py-1 rounded ${
-                      isNormal ? 'bg-green-100 text-green-800' : 
-                      isLow ? 'bg-blue-100 text-blue-800' : 
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {isNormal ? '✓ Normal' : isLow ? '↓ Below Range' : '↑ Above Range'}
-                    </div>
-                    <div className="text-xs text-gray-600 mt-2 border-t border-gray-300 pt-2">
-                      Normal: {converted.refMin}-{converted.refMax}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Trend Charts */}
-        {commonTests.length > 0 ? (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Key Metrics Trends</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {commonTests.map(testName => {
-                const data = getMetricData(testName);
-                if (data.length === 0) return null;
-
-                const refMin = data[0].refMin;
-                const refMax = data[0].refMax;
-                const unit = data[0].unit;
-                const latestValue = data[data.length - 1].value;
-                const isAbnormal = latestValue < refMin || latestValue > refMax;
-                const isLow = latestValue < refMin;
-                
-                // Check if custom range is being used
-                const rangeKey = `${testName}-${unit}`;
-                const hasCustomRange = !!customRanges[rangeKey];
-
-                return (
-                  <div key={testName} className={`border-2 rounded-lg p-4 ${
-                    isAbnormal 
-                      ? isLow ? 'border-blue-400 bg-blue-50' : 'border-red-400 bg-red-50'
-                      : 'border-gray-200'
-                  }`}>
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-semibold">{testName}</h4>
-                      {isAbnormal ? (
-                        <div className="flex items-center gap-2">
-                          <AlertTriangle className={isLow ? 'text-blue-600' : 'text-red-600'} size={18} />
-                          <span className={`text-xs px-2 py-1 rounded font-medium ${
-                            isLow ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {isLow ? '↓ Below Range' : '↑ Above Range'}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="text-green-600" size={18} />
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                            ✓ Normal
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <LineChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                        <YAxis tick={{ fontSize: 12 }} />
-                        <Tooltip />
-                        <ReferenceLine y={refMin} stroke="orange" strokeDasharray="3 3" />
-                        <ReferenceLine y={refMax} stroke="orange" strokeDasharray="3 3" />
-                        <Line type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={2} dot={{ r: 4 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="text-xs text-gray-600 mt-2">
-                      Normal: {refMin} - {refMax} {unit} | Latest: {latestValue} {unit}
-                      {hasCustomRange && (
-                        <span className="text-teal-600 font-medium ml-2">★ Custom</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white p-6 rounded-lg shadow text-center text-gray-500">
-            <p>Add at least 2 lab results to see trend charts</p>
-          </div>
-        )}
-
-        {/* Upcoming Appointments */}
-        {upcomingApts.length > 0 && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Upcoming Appointments</h3>
-            <div className="space-y-3">
-              {upcomingApts.slice(0, 3).map(apt => (
-                <div key={apt.id} className="flex items-start gap-4 p-3 bg-gray-50 rounded">
-                  <Calendar className="text-purple-600 mt-1" size={20} />
-                  <div className="flex-1">
-                    <div className="font-semibold">{apt.type}</div>
-                    <div className="text-sm text-gray-600">{apt.doctor}</div>
-                    <div className="text-sm text-gray-500">{new Date(apt.date).toLocaleString()}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Active Medications */}
-        {currentMeds.length > 0 && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Active Medications</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {currentMeds.map(med => (
-                <div key={med.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded">
-                  <Pill className="text-green-600 mt-1" size={20} />
-                  <div className="flex-1">
-                    <div className="font-semibold">{med.name}</div>
-                    <div className="text-sm text-gray-600">{med.dosage} - {med.frequency}</div>
-                    <div className="text-xs text-gray-500">Take at {med.time}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const TrendChart = ({ testName }) => {
-    const data = labResults[selectedParent]
-      .flatMap(lab => lab.results
-        .filter(r => r.name === testName)
-        .map(r => {
-          const converted = convertResult(r);
-          return {
-            date: lab.date,
-            value: converted.value,
-            refMin: converted.refMin,
-            refMax: converted.refMax,
-            unit: converted.unit
-          };
-        })
-      )
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    if (data.length === 0) return <div className="text-gray-500 text-center py-8">No data available</div>;
-
-    const refMin = data[0].refMin;
-    const refMax = data[0].refMax;
-    const unit = data[0].unit;
-    
-    // Check if custom range is being used
-    const rangeKey = `${testName}-${unit}`;
-    const hasCustomRange = !!customRanges[rangeKey];
-    
-    // Check if any values are out of range
-    const abnormalReadings = data.filter(d => d.value < refMin || d.value > refMax);
-    const hasAbnormal = abnormalReadings.length > 0;
-
-    return (
-      <div className={`p-6 rounded-lg shadow-md mb-4 border-2 ${
-        hasAbnormal ? 'bg-red-50 border-red-400' : 'bg-white border-gray-200'
-      }`}>
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="text-lg font-semibold">{testName} Trend</h3>
-            <div className="text-sm text-gray-600 mt-1">
-              {data.length} reading{data.length > 1 ? 's' : ''} from {data[0].date} to {data[data.length - 1].date}
-            </div>
-          </div>
-          <button onClick={() => setShowChart(null)} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
-          </button>
-        </div>
-        
-        {hasAbnormal && (
-          <div className="bg-red-100 border border-red-400 rounded p-3 mb-4 flex items-start gap-2">
-            <AlertTriangle className="text-red-600 mt-0.5" size={20} />
-            <div>
-              <div className="font-semibold text-red-900">
-                {abnormalReadings.length} out of {data.length} reading{abnormalReadings.length > 1 ? 's are' : ' is'} out of range
-              </div>
-              <div className="text-sm text-red-800 mt-1">
-                Normal range: {refMin} - {refMax} {unit}
-              </div>
-            </div>
-          </div>
-        )}
-        
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip 
-              formatter={(value) => [`${value} ${unit}`, 'Value']}
-              labelFormatter={(label) => `Date: ${label}`}
-            />
-            <Legend />
-            <ReferenceLine 
-              y={refMin} 
-              stroke="#f97316" 
-              strokeDasharray="5 5" 
-              label={{ value: `Min: ${refMin}`, position: 'left', fill: '#f97316' }}
-              strokeWidth={2}
-            />
-            <ReferenceLine 
-              y={refMax} 
-              stroke="#f97316" 
-              strokeDasharray="5 5" 
-              label={{ value: `Max: ${refMax}`, position: 'left', fill: '#f97316' }}
-              strokeWidth={2}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="value" 
-              stroke="#2563eb" 
-              strokeWidth={3} 
-              dot={{ r: 6, fill: '#2563eb' }}
-              activeDot={{ r: 8 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-        
-        <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-xs text-gray-600 font-medium">Reference Range</div>
-              <div className="text-lg font-semibold text-gray-900">
-                {refMin} - {refMax} {unit}
-              </div>
-              {hasCustomRange && (
-                <div className="text-xs text-teal-600 font-medium mt-1">★ Custom range active</div>
-              )}
-            </div>
-            <div>
-              <div className="text-xs text-gray-600 font-medium">Latest Value</div>
-              <div className={`text-lg font-semibold ${
-                data[data.length - 1].value < refMin || data[data.length - 1].value > refMax
-                  ? 'text-red-600'
-                  : 'text-green-600'
-              }`}>
-                {data[data.length - 1].value} {unit}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const MedicationForm = () => {
-    const [formData, setFormData] = useState({
-      name: '',
-      dosage: '',
-      frequency: 'Once daily',
-      time: '08:00'
-    });
-
-    const handleSubmit = () => {
-      if (formData.name && formData.dosage) {
-        addMedication(formData);
-        setShowForm(false);
-      }
-    };
-
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md mb-4">
-        <h3 className="text-lg font-semibold mb-4">Add Medication</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Medication Name</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Dosage</label>
-            <input
-              type="text"
-              value={formData.dosage}
-              onChange={(e) => setFormData({...formData, dosage: e.target.value})}
-              className="w-full p-2 border rounded"
-              placeholder="e.g., 10mg"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Frequency</label>
-            <select
-              value={formData.frequency}
-              onChange={(e) => setFormData({...formData, frequency: e.target.value})}
-              className="w-full p-2 border rounded"
-            >
-              <option>Once daily</option>
-              <option>Twice daily</option>
-              <option>Three times daily</option>
-              <option>As needed</option>
-              <option>Weekly</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Time</label>
-            <input
-              type="time"
-              value={formData.time}
-              onChange={(e) => setFormData({...formData, time: e.target.value})}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2 mt-4">
-          <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Save
-          </button>
-          <button onClick={() => setShowForm(false)} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const AppointmentForm = () => {
-    const [formData, setFormData] = useState({
-      date: '',
-      doctor: '',
-      type: '',
-      notes: ''
-    });
-
-    const handleSubmit = () => {
-      if (formData.date && formData.doctor && formData.type) {
-        addAppointment(formData);
-        setShowForm(false);
-      }
-    };
-
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md mb-4">
-        <h3 className="text-lg font-semibold mb-4">Add Appointment</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Date & Time</label>
-            <input
-              type="datetime-local"
-              value={formData.date}
-              onChange={(e) => setFormData({...formData, date: e.target.value})}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Doctor</label>
-            <input
-              type="text"
-              value={formData.doctor}
-              onChange={(e) => setFormData({...formData, doctor: e.target.value})}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Appointment Type</label>
-            <input
-              type="text"
-              value={formData.type}
-              onChange={(e) => setFormData({...formData, type: e.target.value})}
-              className="w-full p-2 border rounded"
-              placeholder="e.g., Cardiology, General Checkup"
-            />
-          </div>
-          <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Notes</label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({...formData, notes: e.target.value})}
-              className="w-full p-2 border rounded"
-              rows="3"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2 mt-4">
-          <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Save
-          </button>
-          <button onClick={() => setShowForm(false)} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const NoteForm = () => {
-    const [formData, setFormData] = useState({
-      title: '',
-      content: '',
-      category: 'General'
-    });
-
-    const handleSubmit = () => {
-      if (formData.title && formData.content) {
-        addNote(formData);
-        setShowForm(false);
-      }
-    };
-
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md mb-4">
-        <h3 className="text-lg font-semibold mb-4">Add Note</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({...formData, title: e.target.value})}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Category</label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({...formData, category: e.target.value})}
-              className="w-full p-2 border rounded"
-            >
-              <option>General</option>
-              <option>Symptoms</option>
-              <option>Diet</option>
-              <option>Exercise</option>
-              <option>Concerns</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Content</label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => setFormData({...formData, content: e.target.value})}
-              className="w-full p-2 border rounded"
-              rows="4"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2 mt-4">
-          <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Save
-          </button>
-          <button onClick={() => setShowForm(false)} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderContent = () => {
-    if (showSettings) {
-      return <SettingsPanel />;
-    }
-
-    if (showChart) {
-      return <TrendChart testName={showChart} />;
-    }
-
-    if (showForm) {
-      switch(activeTab) {
-        case 'labs':
-          return <LabResultForm />;
-        case 'medications':
-          return <MedicationForm />;
-        case 'appointments':
-          return <AppointmentForm />;
-        case 'notes':
-          return <NoteForm />;
-        default:
-          return null;
-      }
-    }
-
-    switch(activeTab) {
-      case 'dashboard':
-        return <Dashboard />;
-      
-      case 'labs':
-        return (
-          <div className="space-y-4">
-            {labResults[selectedParent].sort((a, b) => new Date(b.date) - new Date(a.date)).map(lab => (
-              <div key={lab.id} className="bg-white p-4 rounded-lg shadow">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="font-semibold text-lg">{lab.testType}</div>
-                    <div className="text-sm text-gray-500">{lab.date}</div>
-                  </div>
-                  <button 
-                    onClick={() => deleteItem(lab.id, 'labs')}
-                    className="text-red-500 hover:text-red-700 text-2xl"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {lab.results.map((result, idx) => {
-                    const converted = convertResult(result);
-                    const isLow = converted.value < converted.refMin;
-                    const isHigh = converted.value > converted.refMax;
-                    const isNormal = !isLow && !isHigh;
                     
-                    return (
-                      <div key={idx} className={`p-3 rounded-lg border-2 shadow-sm ${
-                        isNormal ? 'bg-green-50 border-green-400' : 
-                        isLow ? 'bg-blue-50 border-blue-400' : 
-                        'bg-red-50 border-red-400'
-                      }`}>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className="font-medium text-sm text-gray-900">{converted.name}</div>
-                              {isNormal ? (
-                                <CheckCircle className="text-green-600" size={14} />
-                              ) : (
-                                <AlertCircle className={isLow ? 'text-blue-600' : 'text-red-600'} size={14} />
-                              )}
-                            </div>
-                            <div className="text-xl font-bold text-gray-900">
-                              {converted.value}
-                            </div>
-                            <div className="text-xs text-gray-700 font-medium">{converted.unit}</div>
-                            <div className={`text-xs font-medium px-2 py-1 rounded mt-2 inline-block ${
-                              isNormal ? 'bg-green-100 text-green-800' : 
-                              isLow ? 'bg-blue-100 text-blue-800' : 
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {isNormal ? '✓ Normal' : isLow ? '↓ Low' : '↑ High'}
-                            </div>
-                            <div className="text-xs text-gray-600 mt-2 pt-2 border-t border-gray-300">
-                              <div className="font-medium">Normal Range:</div>
-                              <div>{converted.refMin} - {converted.refMax} {converted.unit}</div>
-                              {converted.hasCustomRange && (
-                                <div className="text-teal-600 font-medium mt-1">★ Custom range</div>
-                              )}
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => setShowChart(result.name)}
-                            className="text-blue-600 hover:text-blue-800 ml-2"
-                            title="View trend"
-                          >
-                            <TrendingUp size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-            {labResults[selectedParent].length === 0 && (
-              <div className="text-center text-gray-500 py-8">No lab results yet</div>
-            )}
-          </div>
-        );
-      
-      case 'medications':
-        return (
-          <div className="space-y-3">
-            {medications[selectedParent].map(med => (
-              <div key={med.id} className="bg-white p-4 rounded-lg shadow">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-semibold text-lg">{med.name}</div>
-                    <div className="text-gray-700">{med.dosage} - {med.frequency}</div>
-                    <div className="text-sm text-gray-500 mt-1">Take at {med.time}</div>
-                  </div>
-                  <button 
-                    onClick={() => deleteItem(med.id, 'medications')}
-                    className="text-red-500 hover:text-red-700 text-2xl"
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            ))}
-            {medications[selectedParent].length === 0 && (
-              <div className="text-center text-gray-500 py-8">No medications added yet</div>
-            )}
-          </div>
-        );
-      
-      case 'appointments':
-        return (
-          <div className="space-y-3">
-            {appointments[selectedParent].map(apt => (
-              <div key={apt.id} className="bg-white p-4 rounded-lg shadow">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-semibold text-lg">{apt.type}</div>
-                    <div className="text-gray-700">with {apt.doctor}</div>
-                    <div className="text-sm text-gray-500 mt-1">{apt.date}</div>
-                    {apt.notes && <div className="text-sm text-gray-600 mt-2">{apt.notes}</div>}
-                  </div>
-                  <button 
-                    onClick={() => deleteItem(apt.id, 'appointments')}
-                    className="text-red-500 hover:text-red-700 text-2xl"
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            ))}
-            {appointments[selectedParent].length === 0 && (
-              <div className="text-center text-gray-500 py-8">No appointments scheduled</div>
-            )}
-          </div>
-        );
-      
-      case 'notes':
-        return (
-          <div className="space-y-3">
-            {notes[selectedParent].map(note => (
-              <div key={note.id} className="bg-white p-4 rounded-lg shadow">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <div className="font-semibold text-lg">{note.title}</div>
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                        {note.category}
-                      </span>
+                    <div class="settings-section">
+                        <h4 style="margin-bottom: 0.5rem;">Lab Test Templates</h4>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Customize reference ranges for each test</p>
+                        <p style="font-size: 0.75rem; background: #dbeafe; padding: 0.75rem; border-radius: 0.25rem; color: #1e40af;">
+                            You can customize the test panels and reference ranges in the full version
+                        </p>
                     </div>
-                    <div className="text-gray-700 mt-2">{note.content}</div>
-                    <div className="text-sm text-gray-500 mt-2">
-                      {new Date(note.timestamp).toLocaleString()}
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => deleteItem(note.id, 'notes')}
-                    className="text-red-500 hover:text-red-700 text-2xl"
-                  >
-                    ×
-                  </button>
+                    
+                    <button class="btn btn-gray" onclick="updateUI()" style="margin-top: 1rem;">Close</button>
                 </div>
-              </div>
-            ))}
-            {notes[selectedParent].length === 0 && (
-              <div className="text-center text-gray-500 py-8">No notes added yet</div>
-            )}
-          </div>
-        );
-      
-      default:
-        return null;
-    }
-  };
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    );
-  }
+        function changeLanguage(lang) {
+            language = lang;
+            updateTranslations();
+            saveData();
+        }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {showShareDialog && <ShareDialog />}
-      
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('appTitle')}</h1>
-              <p className="text-gray-600">{t('appSubtitle')}</p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={toggleSharing}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-                  sharingEnabled 
-                    ? 'bg-green-600 text-white hover:bg-green-700' 
-                    : 'bg-orange-600 text-white hover:bg-orange-700'
-                }`}
-              >
-                <Share2 size={20} />
-                {sharingEnabled ? t('sharingEnabled') : t('enableSharing')}
-              </button>
-              <button
-                onClick={() => setShowSettings(!showSettings)}
-                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
-              >
-                <Settings size={20} />
-                {t('customize')}
-              </button>
-              <button
-                onClick={exportToCSV}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-              >
-                <Download size={20} />
-                {t('export')}
-              </button>
-            </div>
-          </div>
-          
-          {sharingEnabled && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Check className="text-green-600" size={20} />
-                <span className="text-sm text-green-800 font-medium">
-                  Sharing is active - your caregiver can access this dashboard
-                </span>
-              </div>
-              <button
-                onClick={() => setShowShareDialog(true)}
-                className="text-sm text-green-700 hover:text-green-900 underline"
-              >
-                View share link
-              </button>
-            </div>
-          )}
-        </div>
+        // Sharing
+        async function toggleSharing() {
+            if (!sharingEnabled) {
+                sharingEnabled = true;
+                await saveData();
+                showShareModal();
+            } else {
+                if (confirm('This will make the data private again. Your caregiver will lose access. Continue?')) {
+                    sharingEnabled = false;
+                    await saveData();
+                }
+            }
+            updateUI();
+        }
 
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex gap-4">
-            <button
-              onClick={() => { setSelectedParent('mom'); setShowForm(false); setShowChart(null); }}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                selectedParent === 'mom' 
-                  ? 'bg-pink-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <User size={20} />
-              {t('mom')}
-            </button>
-            <button
-              onClick={() => { setSelectedParent('dad'); setShowForm(false); setShowChart(null); }}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                selectedParent === 'dad' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <User size={20} />
-              {t('dad')}
-            </button>
-          </div>
-        </div>
+        function showShareModal() {
+            document.getElementById('shareLink').value = window.location.href;
+            document.getElementById('shareModal').classList.add('show');
+        }
 
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex gap-2 mb-6 overflow-x-auto">
-            <button
-              onClick={() => { setActiveTab('dashboard'); setShowForm(false); setShowChart(null); setShowSettings(false); }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'dashboard' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <TrendingUp size={20} />
-              {t('dashboard')}
-            </button>
-            <button
-              onClick={() => { setActiveTab('labs'); setShowForm(false); setShowChart(null); setShowSettings(false); }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'labs' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Activity size={20} />
-              {t('labResults')}
-            </button>
-            <button
-              onClick={() => { setActiveTab('medications'); setShowForm(false); setShowChart(null); setShowSettings(false); }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'medications' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Pill size={20} />
-              {t('medications')}
-            </button>
-            <button
-              onClick={() => { setActiveTab('appointments'); setShowForm(false); setShowChart(null); setShowSettings(false); }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'appointments' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Calendar size={20} />
-              {t('appointments')}
-            </button>
-            <button
-              onClick={() => { setActiveTab('notes'); setShowForm(false); setShowChart(null); setShowSettings(false); }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'notes' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <FileText size={20} />
-              {t('notes')}
-            </button>
-          </div>
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('show');
+        }
 
-          {!showForm && !showChart && !showSettings && activeTab !== 'dashboard' && (
-            <button
-              onClick={() => setShowForm(true)}
-              className="mb-6 flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Plus size={20} />
-              {t('addNew')}
-            </button>
-          )}
+        function copyShareLink() {
+            const input = document.getElementById('shareLink');
+            input.select();
+            document.execCommand('copy');
+            alert('Link copied to clipboard!');
+        }
 
-          {renderContent()}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default LabTracker;
+        // Export
+        function exportToCSV() {
+            const parent = currentParent === 'mom' ? 'Mom' : 'Dad';
+            let csv = `${parent}'s Health Data Export\nGenerated: ${new Date().toLocaleString()}\n\n`;
+            
+            csv += 'LAB RESULTS\n';
+            csv += 'Date,Test Type,Test Name,Value,Unit,Reference Min,Reference Max,Status\n';
+            labResults[currentParent].forEach(lab => {
+                lab.results.forEach(result => {
+                    const status = result.value < result.refMin ? 'Low' : 
+                                  result.value > result.refMax ? 'High' : 'Normal';
+                    csv += `${lab.date},${lab.testType},${result.name},${result.value},${result.unit},${result.refMin},${result.refMax},${status}\n`;
+                });
+            });
+            
+            csv += '\nMEDICATIONS\n';
+            csv += 'Name,Dosage,Frequency,Time\n';
+            medications[currentParent].forEach(med => {
+                csv += `${med.name},${med.dosage},${med.frequency},${med.time}\n`;
+            });
+            
+            csv += '\nAPPOINTMENTS\n';
+            csv += 'Date,Doctor,Type,Notes\n';
+            appointments[currentParent].forEach(apt => {
+                csv += `${apt.date},${apt.doctor},${apt.type},"${apt.notes || ''}"\n`;
+            });
+            
+            csv += '\nNOTES\n';
+            csv += 'Date,Title,Category,Content\n';
+            notes[currentParent].forEach(note => {
+                csv += `${new Date(note.timestamp).toLocaleString()},"${note.title}",${note.category},"${note.content}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${parent}_Health_Data_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+    </script>
+</body>
+</html>
