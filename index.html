@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parent Health Tracker</title>
+    <title>Parent Health Tracker - Advanced</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -95,6 +95,15 @@
         
         .btn-purple:hover {
             background: #6d28d9;
+        }
+        
+        .btn-orange {
+            background: #ea580c;
+            color: white;
+        }
+        
+        .btn-orange:hover {
+            background: #c2410c;
         }
         
         .btn-gray {
@@ -232,10 +241,16 @@
             border-color: #ef4444;
         }
         
+        .metric-card.yellow {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        
         .metric-label {
             font-size: 0.875rem;
             font-weight: 500;
             margin-bottom: 0.25rem;
+            color: #374151;
         }
         
         .metric-value {
@@ -248,303 +263,13 @@
             margin-top: 0.25rem;
         }
         
-        .form-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 0.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .lab-result-card {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-        
-        .lab-result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1rem;
-        }
-        
-        .lab-result-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-        }
-        
-        .lab-result-date {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-        
-        .lab-results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 0.75rem;
-        }
-        
-        .test-result {
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 2px solid;
-            position: relative;
-        }
-        
-        .test-result.normal {
-            background: #d1fae5;
-            border-color: #34d399;
-        }
-        
-        .test-result.low {
-            background: #dbeafe;
-            border-color: #60a5fa;
-        }
-        
-        .test-result.high {
-            background: #fee2e2;
-            border-color: #f87171;
-        }
-        
-        .test-name {
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-        
-        .test-value {
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-bottom: 0.25rem;
-        }
-        
-        .test-unit {
-            font-size: 0.75rem;
-            color: #4b5563;
-        }
-        
-        .test-status {
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 0.125rem 0.5rem;
-            border-radius: 0.25rem;
-            display: inline-block;
-            margin-top: 0.5rem;
-        }
-        
-        .test-status.normal {
-            background: #10b981;
-            color: white;
-        }
-        
-        .test-status.low {
-            background: #3b82f6;
-            color: white;
-        }
-        
-        .test-status.high {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .test-range {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .medication-card,
-        .appointment-card,
-        .note-card {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-            position: relative;
-        }
-        
-        .delete-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: #ef4444;
-            cursor: pointer;
-            font-size: 1.5rem;
-            line-height: 1;
-        }
-        
-        .delete-btn:hover {
-            color: #dc2626;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: #6b7280;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.show {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #6b7280;
-        }
-        
-        .close-modal:hover {
-            color: #374151;
-        }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .alert.success {
-            background: #d1fae5;
-            border: 1px solid #34d399;
-            color: #065f46;
-        }
-        
-        .alert.warning {
-            background: #fef3c7;
-            border: 1px solid #fbbf24;
-            color: #92400e;
-        }
-        
-        .alert.error {
-            background: #fee2e2;
-            border: 1px solid #f87171;
-            color: #991b1b;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 1rem 0;
-        }
-        
-        .settings-panel {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        
-        .settings-section {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .settings-section:last-child {
-            border-bottom: none;
-        }
-        
-        .lab-template-item {
-            background: #f3f4f6;
-            padding: 0.5rem;
-            border-radius: 0.25rem;
-            margin-bottom: 0.5rem;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr auto;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        
-        .lab-template-item input {
-            padding: 0.25rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-        }
-        
+        /* Kidney Health Panel */
         .kidney-panel {
             padding: 1.5rem;
             border-radius: 0.5rem;
             border-left: 4px solid;
             margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .kidney-panel.good {
@@ -600,6 +325,433 @@
             background: #ef4444;
         }
         
+        .kidney-tests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .kidney-test-card {
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            border: 1px solid;
+            background: white;
+        }
+        
+        .kidney-test-card.normal {
+            border-color: #10b981;
+        }
+        
+        .kidney-test-card.low {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .kidney-test-card.high {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        /* Abnormal Values Alert */
+        .abnormal-alert {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .abnormal-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .abnormal-item {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Form Styles */
+        .form-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* Lab Results */
+        .lab-result-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .lab-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        
+        .lab-result-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .lab-result-date {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .lab-results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .test-result {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 2px solid;
+            position: relative;
+        }
+        
+        .test-result.normal {
+            background: #d1fae5;
+            border-color: #34d399;
+        }
+        
+        .test-result.low {
+            background: #dbeafe;
+            border-color: #60a5fa;
+        }
+        
+        .test-result.high {
+            background: #fee2e2;
+            border-color: #f87171;
+        }
+        
+        .test-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .test-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .test-unit {
+            font-size: 0.75rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+        
+        .test-status {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .test-status.normal {
+            background: #10b981;
+            color: white;
+        }
+        
+        .test-status.low {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .test-status.high {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .test-range {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .custom-range-indicator {
+            display: inline-block;
+            background: #14b8a6;
+            color: white;
+            font-size: 0.625rem;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.125rem;
+            margin-left: 0.25rem;
+        }
+        
+        .trend-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.25rem;
+            border-radius: 0.125rem;
+            cursor: pointer;
+            font-size: 0.625rem;
+        }
+        
+        .trend-btn:hover {
+            background: #2563eb;
+        }
+        
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Medication, Appointment, Note Cards */
+        .medication-card,
+        .appointment-card,
+        .note-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        
+        .delete-btn:hover {
+            color: #dc2626;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+        
+        /* Settings Panel */
+        .settings-panel {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .settings-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .settings-section:last-child {
+            border-bottom: none;
+        }
+        
+        .unit-settings {
+            background: #ede9fe;
+            border: 1px solid #8b5cf6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .unit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .range-settings {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .range-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .range-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .close-modal:hover {
+            color: #374151;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert.success {
+            background: #d1fae5;
+            border: 1px solid #34d399;
+            color: #065f46;
+        }
+        
+        .alert.warning {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            color: #92400e;
+        }
+        
+        .alert.error {
+            background: #fee2e2;
+            border: 1px solid #f87171;
+            color: #991b1b;
+        }
+        
+        .alert.info {
+            background: #dbeafe;
+            border: 1px solid #60a5fa;
+            color: #1e40af;
+        }
+        
         @media (max-width: 640px) {
             .header-content {
                 flex-direction: column;
@@ -611,6 +763,10 @@
             }
             
             .parent-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -698,12 +854,26 @@
             </div>
             <div class="form-group">
                 <label>Share this link with your caregiver:</label>
-                <input type="text" id="shareLink" readonly>
+                <input type="text" id="shareLink" readonly style="width: 100%; margin-top: 0.5rem;">
                 <button class="btn btn-blue" onclick="copyShareLink()" style="margin-top: 0.5rem;">Copy Link</button>
             </div>
             <div class="alert warning">
-                <strong>Important:</strong> Anyone with this link can access and modify the health data. Only share with trusted caregivers.
+                <strong>⚠️ Important:</strong> Anyone with this link can access and modify the health data. Only share with trusted caregivers.
             </div>
+        </div>
+    </div>
+    
+    <!-- Trend Modal -->
+    <div id="trendModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="trendTitle">Test Trend</h3>
+                <button class="close-modal" onclick="closeTrendModal()">&times;</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div id="trendInfo" style="margin-top: 1rem;"></div>
         </div>
     </div>
 
@@ -715,15 +885,23 @@
         let medications = { mom: [], dad: [] };
         let appointments = { mom: [], dad: [] };
         let notes = { mom: [], dad: [] };
+        let unitPreferences = {};
+        let customRanges = { mom: {}, dad: {} };
         let sharingEnabled = false;
         let language = 'en';
+        let currentTrendChart = null;
+        
+        // Complete lab templates with all 12 panels
         let labTemplates = {
             'Complete Blood Count (CBC)': [
                 { name: 'WBC', unit: 'K/uL', refMin: 4.5, refMax: 11.0 },
                 { name: 'RBC', unit: 'M/uL', refMin: 4.5, refMax: 5.9 },
                 { name: 'Hemoglobin', unit: 'g/dL', refMin: 13.5, refMax: 17.5 },
                 { name: 'Hematocrit', unit: '%', refMin: 38.8, refMax: 50.0 },
-                { name: 'Platelets', unit: 'K/uL', refMin: 150, refMax: 400 }
+                { name: 'Platelets', unit: 'K/uL', refMin: 150, refMax: 400 },
+                { name: 'MCV', unit: 'fL', refMin: 80, refMax: 100 },
+                { name: 'MCH', unit: 'pg', refMin: 27, refMax: 33 },
+                { name: 'MCHC', unit: 'g/dL', refMin: 32, refMax: 36 }
             ],
             'Metabolic Panel (CMP)': [
                 { name: 'Glucose', unit: 'mg/dL', refMin: 70, refMax: 100 },
@@ -731,18 +909,70 @@
                 { name: 'Creatinine', unit: 'mg/dL', refMin: 0.7, refMax: 1.3 },
                 { name: 'eGFR', unit: 'mL/min/1.73m²', refMin: 60, refMax: 120 },
                 { name: 'Sodium', unit: 'mmol/L', refMin: 136, refMax: 145 },
-                { name: 'Potassium', unit: 'mmol/L', refMin: 3.5, refMax: 5.0 }
+                { name: 'Potassium', unit: 'mmol/L', refMin: 3.5, refMax: 5.0 },
+                { name: 'Chloride', unit: 'mmol/L', refMin: 98, refMax: 107 },
+                { name: 'CO2', unit: 'mmol/L', refMin: 23, refMax: 29 },
+                { name: 'Calcium', unit: 'mg/dL', refMin: 8.5, refMax: 10.5 }
+            ],
+            'Liver Function': [
+                { name: 'ALT', unit: 'U/L', refMin: 7, refMax: 56 },
+                { name: 'AST', unit: 'U/L', refMin: 10, refMax: 40 },
+                { name: 'ALP', unit: 'U/L', refMin: 44, refMax: 147 },
+                { name: 'Bilirubin Total', unit: 'mg/dL', refMin: 0.3, refMax: 1.2 },
+                { name: 'Bilirubin Direct', unit: 'mg/dL', refMin: 0.0, refMax: 0.3 },
+                { name: 'Albumin', unit: 'g/dL', refMin: 3.5, refMax: 5.5 },
+                { name: 'Total Protein', unit: 'g/dL', refMin: 6.0, refMax: 8.3 },
+                { name: 'GGT', unit: 'U/L', refMin: 0, refMax: 51 }
             ],
             'Lipid Panel': [
                 { name: 'Total Cholesterol', unit: 'mg/dL', refMin: 0, refMax: 200 },
                 { name: 'LDL Cholesterol', unit: 'mg/dL', refMin: 0, refMax: 100 },
                 { name: 'HDL Cholesterol', unit: 'mg/dL', refMin: 40, refMax: 999 },
-                { name: 'Triglycerides', unit: 'mg/dL', refMin: 0, refMax: 150 }
+                { name: 'Triglycerides', unit: 'mg/dL', refMin: 0, refMax: 150 },
+                { name: 'VLDL', unit: 'mg/dL', refMin: 5, refMax: 40 }
             ],
             'Thyroid Function': [
                 { name: 'TSH', unit: 'mIU/L', refMin: 0.4, refMax: 4.0 },
                 { name: 'Free T4', unit: 'ng/dL', refMin: 0.8, refMax: 1.8 },
-                { name: 'Free T3', unit: 'pg/mL', refMin: 2.3, refMax: 4.2 }
+                { name: 'Free T3', unit: 'pg/mL', refMin: 2.3, refMax: 4.2 },
+                { name: 'TPO Antibody', unit: 'IU/mL', refMin: 0, refMax: 34 }
+            ],
+            'Diabetes Markers': [
+                { name: 'HbA1c', unit: '%', refMin: 0, refMax: 5.6 },
+                { name: 'Fasting Glucose', unit: 'mg/dL', refMin: 70, refMax: 100 },
+                { name: 'Insulin', unit: 'µU/mL', refMin: 2.6, refMax: 24.9 }
+            ],
+            'Vitamins & Minerals': [
+                { name: 'Vitamin D', unit: 'ng/mL', refMin: 30, refMax: 100 },
+                { name: 'Vitamin B12', unit: 'pg/mL', refMin: 200, refMax: 900 },
+                { name: 'Folate', unit: 'ng/mL', refMin: 3.0, refMax: 20.0 },
+                { name: 'Iron', unit: 'µg/dL', refMin: 60, refMax: 170 },
+                { name: 'Ferritin', unit: 'ng/mL', refMin: 30, refMax: 400 },
+                { name: 'Magnesium', unit: 'mg/dL', refMin: 1.7, refMax: 2.2 }
+            ],
+            'Cardiac Markers': [
+                { name: 'Troponin I', unit: 'ng/mL', refMin: 0, refMax: 0.04 },
+                { name: 'CK-MB', unit: 'ng/mL', refMin: 0, refMax: 5.0 },
+                { name: 'BNP', unit: 'pg/mL', refMin: 0, refMax: 100 },
+                { name: 'CRP', unit: 'mg/L', refMin: 0, refMax: 3.0 }
+            ],
+            'Tumor Markers': [
+                { name: 'PSA', unit: 'ng/mL', refMin: 0, refMax: 4.0 },
+                { name: 'CEA', unit: 'ng/mL', refMin: 0, refMax: 3.0 },
+                { name: 'CA 19-9', unit: 'U/mL', refMin: 0, refMax: 37 },
+                { name: 'CA 125', unit: 'U/mL', refMin: 0, refMax: 35 },
+                { name: 'AFP', unit: 'ng/mL', refMin: 0, refMax: 9.0 }
+            ],
+            'Coagulation': [
+                { name: 'PT', unit: 'seconds', refMin: 11, refMax: 13.5 },
+                { name: 'INR', unit: 'ratio', refMin: 0.8, refMax: 1.1 },
+                { name: 'aPTT', unit: 'seconds', refMin: 25, refMax: 35 },
+                { name: 'D-Dimer', unit: 'ng/mL', refMin: 0, refMax: 500 }
+            ],
+            'Electrolytes Extended': [
+                { name: 'Phosphorus', unit: 'mg/dL', refMin: 2.5, refMax: 4.5 },
+                { name: 'Uric Acid', unit: 'mg/dL', refMin: 3.5, refMax: 7.2 },
+                { name: 'Lactate', unit: 'mmol/L', refMin: 0.5, refMax: 2.0 }
             ],
             'Kidney Function Panel': [
                 { name: 'Creatinine', unit: 'mg/dL', refMin: 0.7, refMax: 1.3 },
@@ -750,10 +980,67 @@
                 { name: 'eGFR', unit: 'mL/min/1.73m²', refMin: 60, refMax: 120 },
                 { name: 'BUN/Creatinine Ratio', unit: 'ratio', refMin: 10, refMax: 20 },
                 { name: 'Albumin', unit: 'g/dL', refMin: 3.5, refMax: 5.5 },
-                { name: 'Uric Acid', unit: 'mg/dL', refMin: 3.5, refMax: 7.2 }
+                { name: 'Uric Acid', unit: 'mg/dL', refMin: 3.5, refMax: 7.2 },
+                { name: 'Cystatin C', unit: 'mg/L', refMin: 0.5, refMax: 1.0 },
+                { name: 'Albumin/Creatinine Ratio', unit: 'mg/g', refMin: 0, refMax: 30 },
+                { name: 'Protein (Urine)', unit: 'mg/dL', refMin: 0, refMax: 14 },
+                { name: 'Microalbumin (Urine)', unit: 'mg/L', refMin: 0, refMax: 30 }
             ]
         };
-
+        
+        // Unit conversions
+        const UNIT_CONVERSIONS = {
+            'Glucose': {
+                'mg/dL': { to: { 'mmol/L': (v) => (v / 18).toFixed(2) }, default: true },
+                'mmol/L': { to: { 'mg/dL': (v) => (v * 18).toFixed(2) } }
+            },
+            'Total Cholesterol': {
+                'mg/dL': { to: { 'mmol/L': (v) => (v / 38.67).toFixed(2) }, default: true },
+                'mmol/L': { to: { 'mg/dL': (v) => (v * 38.67).toFixed(2) } }
+            },
+            'LDL Cholesterol': {
+                'mg/dL': { to: { 'mmol/L': (v) => (v / 38.67).toFixed(2) }, default: true },
+                'mmol/L': { to: { 'mg/dL': (v) => (v * 38.67).toFixed(2) } }
+            },
+            'HDL Cholesterol': {
+                'mg/dL': { to: { 'mmol/L': (v) => (v / 38.67).toFixed(2) }, default: true },
+                'mmol/L': { to: { 'mg/dL': (v) => (v * 38.67).toFixed(2) } }
+            },
+            'Triglycerides': {
+                'mg/dL': { to: { 'mmol/L': (v) => (v / 88.57).toFixed(2) }, default: true },
+                'mmol/L': { to: { 'mg/dL': (v) => (v * 88.57).toFixed(2) } }
+            },
+            'Creatinine': {
+                'mg/dL': { to: { 'μmol/L': (v) => (v * 88.4).toFixed(2) }, default: true },
+                'μmol/L': { to: { 'mg/dL': (v) => (v / 88.4).toFixed(2) } }
+            },
+            'BUN': {
+                'mg/dL': { to: { 'mmol/L': (v) => (v / 2.8).toFixed(2) }, default: true },
+                'mmol/L': { to: { 'mg/dL': (v) => (v * 2.8).toFixed(2) } }
+            },
+            'Fasting Glucose': {
+                'mg/dL': { to: { 'mmol/L': (v) => (v / 18).toFixed(2) }, default: true },
+                'mmol/L': { to: { 'mg/dL': (v) => (v * 18).toFixed(2) } }
+            },
+            'Hemoglobin': {
+                'g/dL': { to: { 'g/L': (v) => (v * 10).toFixed(2), 'mmol/L': (v) => (v * 0.6206).toFixed(2) }, default: true },
+                'g/L': { to: { 'g/dL': (v) => (v / 10).toFixed(2), 'mmol/L': (v) => (v * 0.06206).toFixed(2) } },
+                'mmol/L': { to: { 'g/dL': (v) => (v / 0.6206).toFixed(2), 'g/L': (v) => (v / 0.06206).toFixed(2) } }
+            },
+            'Calcium': {
+                'mg/dL': { to: { 'mmol/L': (v) => (v / 4.0).toFixed(2) }, default: true },
+                'mmol/L': { to: { 'mg/dL': (v) => (v * 4.0).toFixed(2) } }
+            },
+            'Uric Acid': {
+                'mg/dL': { to: { 'µmol/L': (v) => (v * 59.48).toFixed(2) }, default: true },
+                'µmol/L': { to: { 'mg/dL': (v) => (v / 59.48).toFixed(2) } }
+            },
+            'Cystatin C': {
+                'mg/L': { to: { 'nmol/L': (v) => (v * 74.9).toFixed(2) }, default: true },
+                'nmol/L': { to: { 'mg/L': (v) => (v / 74.9).toFixed(2) } }
+            }
+        };
+        
         const translations = {
             en: {
                 appTitle: "Parent Health Tracker",
@@ -778,7 +1065,20 @@
                 needsAttention: "Needs attention",
                 last: "Last",
                 currentlyTaking: "Currently taking",
-                next: "Next"
+                next: "Next",
+                kidneyFunctionStatus: "Kidney Function Status",
+                healthScore: "Health Score",
+                areasOfConcern: "Areas of Concern",
+                valuesOutOfRange: "Values Out of Range",
+                normal: "Normal",
+                low: "Low",
+                high: "High",
+                belowRange: "Below Range",
+                aboveRange: "Above Range",
+                normalRange: "Normal Range",
+                latestValue: "Latest Value",
+                customRange: "Custom range",
+                viewTrend: "View trend"
             },
             th: {
                 appTitle: "ติดตามสุขภาพพ่อแม่",
@@ -803,7 +1103,20 @@
                 needsAttention: "ต้องดูแล",
                 last: "ล่าสุด",
                 currentlyTaking: "กำลังใช้",
-                next: "ถัดไป"
+                next: "ถัดไป",
+                kidneyFunctionStatus: "สถานะการทำงานของไต",
+                healthScore: "คะแนนสุขภาพ",
+                areasOfConcern: "จุดที่ต้องระวัง",
+                valuesOutOfRange: "ค่าที่อยู่นอกช่วง",
+                normal: "ปกติ",
+                low: "ต่ำ",
+                high: "สูง",
+                belowRange: "ต่ำกว่าปกติ",
+                aboveRange: "สูงกว่าปกติ",
+                normalRange: "ช่วงปกติ",
+                latestValue: "ค่าล่าสุด",
+                customRange: "ช่วงที่กำหนดเอง",
+                viewTrend: "ดูแนวโน้ม"
             }
         };
 
@@ -834,6 +1147,121 @@
             document.getElementById('sharingBtn').textContent = sharingEnabled ? t('sharingEnabled') : t('enableSharing');
         }
 
+        // Convert value between units
+        function convertValue(testName, value, fromUnit, toUnit) {
+            if (!UNIT_CONVERSIONS[testName] || fromUnit === toUnit) {
+                return value;
+            }
+            
+            const conversion = UNIT_CONVERSIONS[testName][fromUnit];
+            if (conversion && conversion.to[toUnit]) {
+                return parseFloat(conversion.to[toUnit](value));
+            }
+            return value;
+        }
+
+        // Get current unit preference
+        function getCurrentUnit(testName, originalUnit) {
+            if (unitPreferences[testName]) {
+                return unitPreferences[testName];
+            }
+            if (UNIT_CONVERSIONS[testName]) {
+                const defaultUnit = Object.keys(UNIT_CONVERSIONS[testName]).find(
+                    unit => UNIT_CONVERSIONS[testName][unit].default
+                );
+                return defaultUnit || originalUnit;
+            }
+            return originalUnit;
+        }
+
+        // Convert result with custom ranges
+        function convertResult(result) {
+            const preferredUnit = getCurrentUnit(result.name, result.unit);
+            let convertedValue = result.value;
+            let convertedMin = result.refMin;
+            let convertedMax = result.refMax;
+            
+            if (preferredUnit !== result.unit) {
+                convertedValue = convertValue(result.name, result.value, result.unit, preferredUnit);
+                convertedMin = convertValue(result.name, result.refMin, result.unit, preferredUnit);
+                convertedMax = convertValue(result.name, result.refMax, result.unit, preferredUnit);
+            }
+            
+            // Apply custom ranges if they exist (parent-specific)
+            const rangeKey = `${result.name}-${preferredUnit}`;
+            const parentRanges = customRanges[currentParent] || {};
+            if (parentRanges[rangeKey]) {
+                convertedMin = parentRanges[rangeKey].min;
+                convertedMax = parentRanges[rangeKey].max;
+            }
+            
+            return {
+                ...result,
+                value: convertedValue,
+                unit: preferredUnit,
+                refMin: convertedMin,
+                refMax: convertedMax,
+                originalUnit: result.unit,
+                originalValue: result.value,
+                hasCustomRange: !!parentRanges[rangeKey]
+            };
+        }
+
+        // Calculate kidney health score
+        function calculateKidneyScore() {
+            const kidneyTests = ['Creatinine', 'BUN', 'eGFR', 'BUN/Creatinine Ratio', 
+                                 'Albumin/Creatinine Ratio', 'Uric Acid', 'Cystatin C'];
+            const latestKidneyResults = [];
+            
+            kidneyTests.forEach(testName => {
+                let latest = null;
+                let latestDate = null;
+                labResults[currentParent].forEach(lab => {
+                    lab.results.forEach(result => {
+                        if (result.name === testName) {
+                            const labDate = new Date(lab.date);
+                            if (!latestDate || labDate > latestDate) {
+                                latestDate = labDate;
+                                latest = convertResult(result);
+                            }
+                        }
+                    });
+                });
+                if (latest) {
+                    latestKidneyResults.push(latest);
+                }
+            });
+
+            let kidneyScore = 100;
+            let kidneyIssues = [];
+            
+            latestKidneyResults.forEach(result => {
+                if (result.value < result.refMin || result.value > result.refMax) {
+                    if (result.name === 'eGFR' && result.value < 60) {
+                        kidneyScore -= 30;
+                        kidneyIssues.push(`Low eGFR (${result.value})`);
+                    } else if (result.name === 'Creatinine' && result.value > 1.5) {
+                        kidneyScore -= 20;
+                        kidneyIssues.push(`High Creatinine (${result.value})`);
+                    } else if (result.name === 'Albumin/Creatinine Ratio' && result.value > 30) {
+                        kidneyScore -= 15;
+                        kidneyIssues.push(`Elevated ACR (${result.value})`);
+                    } else {
+                        kidneyScore -= 10;
+                    }
+                }
+            });
+            
+            kidneyScore = Math.max(0, kidneyScore);
+            
+            return {
+                score: kidneyScore,
+                issues: kidneyIssues,
+                results: latestKidneyResults,
+                hasData: latestKidneyResults.length > 0
+            };
+        }
+
         // Storage functions
         async function loadData() {
             try {
@@ -845,12 +1273,16 @@
                     const medsResult = await window.storage.get('medications', sharingEnabled);
                     const aptsResult = await window.storage.get('appointments', sharingEnabled);
                     const notesResult = await window.storage.get('notes', sharingEnabled);
+                    const unitsResult = await window.storage.get('unit-preferences', sharingEnabled);
+                    const rangesResult = await window.storage.get('custom-ranges', sharingEnabled);
                     const langResult = await window.storage.get('language', sharingEnabled);
 
                     if (labsResult?.value) labResults = JSON.parse(labsResult.value);
                     if (medsResult?.value) medications = JSON.parse(medsResult.value);
                     if (aptsResult?.value) appointments = JSON.parse(aptsResult.value);
                     if (notesResult?.value) notes = JSON.parse(notesResult.value);
+                    if (unitsResult?.value) unitPreferences = JSON.parse(unitsResult.value);
+                    if (rangesResult?.value) customRanges = JSON.parse(rangesResult.value);
                     if (langResult?.value) language = langResult.value;
                 } else {
                     // Fallback to localStorage
@@ -861,6 +1293,8 @@
                         medications = data.medications || medications;
                         appointments = data.appointments || appointments;
                         notes = data.notes || notes;
+                        unitPreferences = data.unitPreferences || unitPreferences;
+                        customRanges = data.customRanges || customRanges;
                         sharingEnabled = data.sharingEnabled || false;
                         language = data.language || 'en';
                     }
@@ -879,6 +1313,8 @@
                     await window.storage.set('medications', JSON.stringify(medications), sharingEnabled);
                     await window.storage.set('appointments', JSON.stringify(appointments), sharingEnabled);
                     await window.storage.set('notes', JSON.stringify(notes), sharingEnabled);
+                    await window.storage.set('unit-preferences', JSON.stringify(unitPreferences), sharingEnabled);
+                    await window.storage.set('custom-ranges', JSON.stringify(customRanges), sharingEnabled);
                     await window.storage.set('language', language, sharingEnabled);
                     await window.storage.set('sharing-enabled', String(sharingEnabled), true);
                 } else {
@@ -888,6 +1324,8 @@
                         medications,
                         appointments,
                         notes,
+                        unitPreferences,
+                        customRanges,
                         sharingEnabled,
                         language
                     };
@@ -957,12 +1395,22 @@
             const meds = medications[currentParent];
             const apts = appointments[currentParent].filter(apt => new Date(apt.date) >= new Date());
             
-            // Count abnormal values
-            let abnormalCount = 0;
+            // Count abnormal values with details
+            const abnormalValues = [];
             labs.forEach(lab => {
                 lab.results.forEach(result => {
-                    if (result.value < result.refMin || result.value > result.refMax) {
-                        abnormalCount++;
+                    const converted = convertResult(result);
+                    if (converted.value < converted.refMin || converted.value > converted.refMax) {
+                        abnormalValues.push({
+                            date: lab.date,
+                            testType: lab.testType,
+                            name: converted.name,
+                            value: converted.value,
+                            unit: converted.unit,
+                            refMin: converted.refMin,
+                            refMax: converted.refMax,
+                            status: converted.value < converted.refMin ? 'Low' : 'High'
+                        });
                     }
                 });
             });
@@ -971,6 +1419,9 @@
                 labs.sort((a, b) => new Date(b.date) - new Date(a.date))[0] : null;
             const nextApt = apts.length > 0 ? 
                 apts.sort((a, b) => new Date(a.date) - new Date(b.date))[0] : null;
+            
+            // Get kidney health data
+            const kidneyData = calculateKidneyScore();
             
             let html = `
                 <div class="dashboard-grid">
@@ -989,38 +1440,357 @@
                         <div class="metric-value">${apts.length}</div>
                         <div class="metric-info">${nextApt ? `${t('next')}: ${new Date(nextApt.date).toLocaleDateString()}` : ''}</div>
                     </div>
-                    <div class="metric-card ${abnormalCount > 0 ? 'red' : 'green'}">
+                    <div class="metric-card ${abnormalValues.length > 0 ? 'red' : 'green'}">
                         <div class="metric-label">${t('abnormalValues')}</div>
-                        <div class="metric-value">${abnormalCount}</div>
-                        <div class="metric-info">${abnormalCount === 0 ? t('allNormal') : t('needsAttention')}</div>
+                        <div class="metric-value">${abnormalValues.length}</div>
+                        <div class="metric-info">${abnormalValues.length === 0 ? t('allNormal') : t('needsAttention')}</div>
                     </div>
                 </div>
             `;
             
-            // Show latest results if available
-            if (latestLab) {
-                html += `<h3 style="margin-top: 2rem;">Latest Test Results - ${latestLab.testType}</h3>`;
-                html += `<div class="lab-results-grid">`;
-                latestLab.results.forEach(result => {
-                    const status = result.value < result.refMin ? 'low' : 
-                                  result.value > result.refMax ? 'high' : 'normal';
-                    const statusText = status === 'normal' ? '✓ Normal' : 
-                                      status === 'low' ? '↓ Low' : '↑ High';
+            // Kidney Function Panel
+            if (kidneyData.hasData) {
+                const scoreClass = kidneyData.score >= 80 ? 'good' : 
+                                  kidneyData.score >= 60 ? 'warning' : 'danger';
+                const fillClass = scoreClass;
+                
+                html += `
+                    <div class="kidney-panel ${scoreClass}">
+                        <h3 style="margin-bottom: 1rem; font-size: 1.125rem; font-weight: 600;">
+                            ${t('kidneyFunctionStatus')}
+                        </h3>
+                        <div class="kidney-score">
+                            <span style="font-weight: 500;">${t('healthScore')}</span>
+                            <span class="kidney-score-value">${kidneyData.score}/100</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${fillClass}" style="width: ${kidneyData.score}%"></div>
+                        </div>
+                        <div class="kidney-tests-grid">
+                `;
+                
+                kidneyData.results.forEach(result => {
+                    const isLow = result.value < result.refMin;
+                    const isHigh = result.value > result.refMax;
+                    const status = isLow ? 'low' : isHigh ? 'high' : 'normal';
                     
                     html += `
-                        <div class="test-result ${status}">
-                            <div class="test-name">${result.name}</div>
-                            <div class="test-value">${result.value}</div>
-                            <div class="test-unit">${result.unit}</div>
-                            <div class="test-status ${status}">${statusText}</div>
-                            <div class="test-range">Normal: ${result.refMin}-${result.refMax}</div>
+                        <div class="kidney-test-card ${status}">
+                            <div style="font-size: 0.75rem; font-weight: 500; color: #374151;">
+                                ${result.name}
+                            </div>
+                            <div style="font-size: 1.125rem; font-weight: bold; margin: 0.25rem 0;">
+                                ${result.value}
+                            </div>
+                            <div style="font-size: 0.625rem; color: #6b7280;">
+                                ${result.unit}
+                            </div>
                         </div>
                     `;
                 });
+                
+                html += `</div>`;
+                
+                if (kidneyData.issues.length > 0) {
+                    html += `
+                        <div style="margin-top: 1rem; padding: 0.75rem; background: white; border-radius: 0.25rem; border: 1px solid #fb923c;">
+                            <div style="font-weight: 600; color: #ea580c; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                ${t('areasOfConcern')}:
+                            </div>
+                            <ul style="font-size: 0.875rem; color: #9a3412; list-style: none;">
+                    `;
+                    kidneyData.issues.forEach(issue => {
+                        html += `<li>• ${issue}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+                
+                html += `</div>`;
+            }
+            
+            // Abnormal Values Alert
+            if (abnormalValues.length > 0) {
+                html += `
+                    <div class="abnormal-alert">
+                        <div class="abnormal-header">
+                            <span style="font-size: 1.125rem; font-weight: 600; color: #991b1b;">
+                                ⚠️ ${abnormalValues.length} ${t('valuesOutOfRange')}
+                            </span>
+                        </div>
+                        <div>
+                `;
+                
+                abnormalValues.slice(0, 5).forEach(item => {
+                    const statusColor = item.status === 'Low' ? '#1e40af' : '#991b1b';
+                    html += `
+                        <div class="abnormal-item">
+                            <div>
+                                <div style="font-weight: 600;">${item.name}</div>
+                                <div style="font-size: 0.875rem; color: #6b7280;">
+                                    Value: ${item.value} ${item.unit} 
+                                    (Normal: ${item.refMin}-${item.refMax})
+                                </div>
+                                <div style="font-size: 0.75rem; color: #9ca3af;">
+                                    ${item.testType} • ${item.date}
+                                </div>
+                            </div>
+                            <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">
+                                ${item.status}
+                            </span>
+                        </div>
+                    `;
+                });
+                
+                if (abnormalValues.length > 5) {
+                    html += `
+                        <div style="text-align: center; margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">
+                            Showing 5 of ${abnormalValues.length} abnormal values
+                        </div>
+                    `;
+                }
+                
+                html += `</div></div>`;
+            }
+            
+            // Trend Charts for common tests
+            const testFrequency = {};
+            labs.forEach(lab => {
+                lab.results.forEach(r => {
+                    testFrequency[r.name] = (testFrequency[r.name] || 0) + 1;
+                });
+            });
+            
+            const commonTests = Object.entries(testFrequency)
+                .filter(([name, count]) => count >= 2)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 6)
+                .map(([name]) => name);
+            
+            if (commonTests.length > 0) {
+                html += `<h3 style="margin-top: 2rem; margin-bottom: 1rem;">Key Metrics Trends</h3>`;
+                html += `<div class="chart-grid">`;
+                
+                commonTests.forEach(testName => {
+                    const data = [];
+                    labs.forEach(lab => {
+                        lab.results.forEach(result => {
+                            if (result.name === testName) {
+                                const converted = convertResult(result);
+                                data.push({
+                                    date: lab.date,
+                                    value: converted.value,
+                                    refMin: converted.refMin,
+                                    refMax: converted.refMax,
+                                    unit: converted.unit
+                                });
+                            }
+                        });
+                    });
+                    
+                    data.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    
+                    if (data.length > 0) {
+                        const latestValue = data[data.length - 1].value;
+                        const isAbnormal = latestValue < data[0].refMin || latestValue > data[0].refMax;
+                        
+                        html += `
+                            <div class="chart-container" style="border: 2px solid ${isAbnormal ? '#ef4444' : '#10b981'};">
+                                <div class="chart-header">
+                                    <span style="font-weight: 600;">${testName}</span>
+                                    <button class="trend-btn" onclick="showTrendModal('${testName}')">
+                                        ${t('viewTrend')}
+                                    </button>
+                                </div>
+                                <canvas id="chart-${testName.replace(/\s+/g, '-')}"></canvas>
+                                <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">
+                                    Normal: ${data[0].refMin} - ${data[0].refMax} ${data[0].unit} | 
+                                    Latest: ${latestValue} ${data[0].unit}
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
                 html += `</div>`;
             }
             
             document.getElementById('contentArea').innerHTML = html;
+            
+            // Initialize mini charts
+            if (commonTests.length > 0) {
+                setTimeout(() => {
+                    commonTests.forEach(testName => {
+                        const canvas = document.getElementById(`chart-${testName.replace(/\s+/g, '-')}`);
+                        if (canvas) {
+                            createMiniChart(canvas, testName);
+                        }
+                    });
+                }, 100);
+            }
+        }
+
+        function createMiniChart(canvas, testName) {
+            const data = [];
+            labResults[currentParent].forEach(lab => {
+                lab.results.forEach(result => {
+                    if (result.name === testName) {
+                        const converted = convertResult(result);
+                        data.push({
+                            x: lab.date,
+                            y: converted.value,
+                            refMin: converted.refMin,
+                            refMax: converted.refMax
+                        });
+                    }
+                });
+            });
+            
+            data.sort((a, b) => new Date(a.x) - new Date(b.x));
+            
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.x),
+                    datasets: [{
+                        label: testName,
+                        data: data.map(d => d.y),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function showTrendModal(testName) {
+            const data = [];
+            labResults[currentParent].forEach(lab => {
+                lab.results.forEach(result => {
+                    if (result.name === testName) {
+                        const converted = convertResult(result);
+                        data.push({
+                            date: lab.date,
+                            value: converted.value,
+                            refMin: converted.refMin,
+                            refMax: converted.refMax,
+                            unit: converted.unit,
+                            hasCustomRange: converted.hasCustomRange
+                        });
+                    }
+                });
+            });
+            
+            data.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            document.getElementById('trendTitle').textContent = `${testName} Trend Analysis`;
+            document.getElementById('trendModal').classList.add('show');
+            
+            // Create detailed info
+            let info = `
+                <div class="alert info">
+                    <strong>Test Details:</strong><br>
+                    • ${data.length} readings from ${data[0].date} to ${data[data.length-1].date}<br>
+                    • Normal range: ${data[0].refMin} - ${data[0].refMax} ${data[0].unit}
+                    ${data[0].hasCustomRange ? '<br>• Using custom reference range' : ''}
+                </div>
+            `;
+            
+            document.getElementById('trendInfo').innerHTML = info;
+            
+            // Destroy previous chart if exists
+            if (currentTrendChart) {
+                currentTrendChart.destroy();
+            }
+            
+            // Create detailed trend chart
+            const canvas = document.getElementById('trendChart');
+            currentTrendChart = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [
+                        {
+                            label: testName,
+                            data: data.map(d => d.value),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Min Range',
+                            data: data.map(d => d.refMin),
+                            borderColor: '#fbbf24',
+                            borderDash: [5, 5],
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'Max Range',
+                            data: data.map(d => d.refMax),
+                            borderColor: '#fbbf24',
+                            borderDash: [5, 5],
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        const point = data[context.dataIndex];
+                                        const status = point.value < point.refMin ? 'Below normal' :
+                                                      point.value > point.refMax ? 'Above normal' : 'Normal';
+                                        return `Status: ${status}`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: data[0].unit
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function closeTrendModal() {
+            document.getElementById('trendModal').classList.remove('show');
+            if (currentTrendChart) {
+                currentTrendChart.destroy();
+                currentTrendChart = null;
+            }
         }
 
         function showLabResults() {
@@ -1045,18 +1815,27 @@
                     `;
                     
                     lab.results.forEach(result => {
-                        const status = result.value < result.refMin ? 'low' : 
-                                      result.value > result.refMax ? 'high' : 'normal';
+                        const converted = convertResult(result);
+                        const status = converted.value < converted.refMin ? 'low' : 
+                                      converted.value > converted.refMax ? 'high' : 'normal';
                         const statusText = status === 'normal' ? '✓ Normal' : 
                                           status === 'low' ? '↓ Low' : '↑ High';
                         
                         html += `
                             <div class="test-result ${status}">
-                                <div class="test-name">${result.name}</div>
-                                <div class="test-value">${result.value}</div>
-                                <div class="test-unit">${result.unit}</div>
+                                <div class="test-name">
+                                    ${converted.name}
+                                    <button class="trend-btn" onclick="showTrendModal('${result.name}')" title="${t('viewTrend')}">
+                                        📊
+                                    </button>
+                                </div>
+                                <div class="test-value">${converted.value}</div>
+                                <div class="test-unit">${converted.unit}</div>
                                 <div class="test-status ${status}">${statusText}</div>
-                                <div class="test-range">Normal: ${result.refMin}-${result.refMax}</div>
+                                <div class="test-range">
+                                    Normal: ${converted.refMin}-${converted.refMax}
+                                    ${converted.hasCustomRange ? '<span class="custom-range-indicator">Custom</span>' : ''}
+                                </div>
                             </div>
                         `;
                     });
@@ -1141,8 +1920,6 @@
 
         // Add forms
         function showAddForm() {
-            const contentArea = document.getElementById('contentArea');
-            
             switch(currentTab) {
                 case 'labs':
                     showLabForm();
@@ -1192,20 +1969,34 @@
             const testType = document.getElementById('labTestType').value;
             const template = labTemplates[testType];
             let html = '<h4 style="margin-bottom: 0.5rem;">Enter Results</h4>';
+            html += '<div style="max-height: 400px; overflow-y: auto;">';
             
             template.forEach((test, index) => {
+                // Check if unit conversion is available
+                const availableUnits = UNIT_CONVERSIONS[test.name] ? 
+                    Object.keys(UNIT_CONVERSIONS[test.name]) : null;
+                const currentUnit = getCurrentUnit(test.name, test.unit);
+                
                 html += `
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding: 0.75rem; background: #f3f4f6; border-radius: 0.25rem;">
                         <div style="flex: 1;">
                             <div style="font-weight: 500; font-size: 0.875rem;">${test.name}</div>
-                            <div style="font-size: 0.75rem; color: #6b7280;">Ref: ${test.refMin} - ${test.refMax} ${test.unit}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Ref: ${test.refMin} - ${test.refMax} ${currentUnit}</div>
                         </div>
-                        <input type="number" step="0.01" id="labValue_${index}" placeholder="Value" style="width: 100px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
-                        <span style="font-size: 0.875rem; color: #6b7280; width: 60px;">${test.unit}</span>
+                        <input type="number" step="0.01" id="labValue_${index}" placeholder="Value" 
+                               style="width: 100px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                        ${availableUnits ? `
+                            <select id="labUnit_${index}" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                                ${availableUnits.map(unit => 
+                                    `<option value="${unit}" ${unit === currentUnit ? 'selected' : ''}>${unit}</option>`
+                                ).join('')}
+                            </select>
+                        ` : `<span style="font-size: 0.875rem; color: #6b7280; width: 60px;">${currentUnit}</span>`}
                     </div>
                 `;
             });
             
+            html += '</div>';
             document.getElementById('labTestFields').innerHTML = html;
         }
 
@@ -1218,10 +2009,13 @@
             template.forEach((test, index) => {
                 const value = parseFloat(document.getElementById(`labValue_${index}`).value);
                 if (!isNaN(value)) {
+                    const unitSelect = document.getElementById(`labUnit_${index}`);
+                    const unit = unitSelect ? unitSelect.value : test.unit;
+                    
                     results.push({
                         name: test.name,
                         value: value,
-                        unit: test.unit,
+                        unit: unit,
                         refMin: test.refMin,
                         refMax: test.refMax
                     });
@@ -1408,52 +2202,163 @@
 
         // Delete functions
         function deleteLabResult(id) {
-            labResults[currentParent] = labResults[currentParent].filter(l => l.id !== id);
-            saveData();
-            updateUI();
+            if (confirm('Are you sure you want to delete this lab result?')) {
+                labResults[currentParent] = labResults[currentParent].filter(l => l.id !== id);
+                saveData();
+                updateUI();
+            }
         }
 
         function deleteMedication(id) {
-            medications[currentParent] = medications[currentParent].filter(m => m.id !== id);
-            saveData();
-            updateUI();
+            if (confirm('Are you sure you want to delete this medication?')) {
+                medications[currentParent] = medications[currentParent].filter(m => m.id !== id);
+                saveData();
+                updateUI();
+            }
         }
 
         function deleteAppointment(id) {
-            appointments[currentParent] = appointments[currentParent].filter(a => a.id !== id);
-            saveData();
-            updateUI();
+            if (confirm('Are you sure you want to delete this appointment?')) {
+                appointments[currentParent] = appointments[currentParent].filter(a => a.id !== id);
+                saveData();
+                updateUI();
+            }
         }
 
         function deleteNote(id) {
-            notes[currentParent] = notes[currentParent].filter(n => n.id !== id);
-            saveData();
-            updateUI();
+            if (confirm('Are you sure you want to delete this note?')) {
+                notes[currentParent] = notes[currentParent].filter(n => n.id !== id);
+                saveData();
+                updateUI();
+            }
         }
 
-        // Settings
+        // Settings and Customization
         function showSettings() {
+            const testsWithConversions = Object.keys(UNIT_CONVERSIONS);
+            const allTests = new Set();
+            labResults[currentParent].forEach(lab => {
+                lab.results.forEach(r => {
+                    const unit = getCurrentUnit(r.name, r.unit);
+                    allTests.add(`${r.name}-${unit}`);
+                });
+            });
+            const testsForRangeCustomization = Array.from(allTests).sort();
+            const parentRanges = customRanges[currentParent] || {};
+            
             let html = `
                 <div class="settings-panel">
-                    <h3 style="margin-bottom: 1rem;">Settings</h3>
+                    <h3 style="margin-bottom: 1rem;">Settings & Customization</h3>
                     
                     <div class="settings-section">
-                        <h4 style="margin-bottom: 0.5rem;">Language</h4>
-                        <select onchange="changeLanguage(this.value)" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                        <h4 style="margin-bottom: 0.5rem;">Language / ภาษา</h4>
+                        <select onchange="changeLanguage(this.value)" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; width: 200px;">
                             <option value="en" ${language === 'en' ? 'selected' : ''}>English</option>
                             <option value="th" ${language === 'th' ? 'selected' : ''}>ภาษาไทย (Thai)</option>
                         </select>
                     </div>
                     
                     <div class="settings-section">
-                        <h4 style="margin-bottom: 0.5rem;">Lab Test Templates</h4>
-                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Customize reference ranges for each test</p>
-                        <p style="font-size: 0.75rem; background: #dbeafe; padding: 0.75rem; border-radius: 0.25rem; color: #1e40af;">
-                            You can customize the test panels and reference ranges in the full version
+                        <h4 style="margin-bottom: 0.5rem;">Unit Conversions</h4>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">
+                            Change how test results are displayed. Values will be automatically converted.
                         </p>
+                        <div class="unit-settings">
+                            ${testsWithConversions.map(testName => {
+                                const availableUnits = Object.keys(UNIT_CONVERSIONS[testName]);
+                                const currentUnit = unitPreferences[testName] || availableUnits[0];
+                                
+                                return `
+                                    <div class="unit-item">
+                                        <span style="font-weight: 500;">${testName}</span>
+                                        <select onchange="updateUnitPreference('${testName}', this.value)" 
+                                                style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                                            ${availableUnits.map(unit => 
+                                                `<option value="${unit}" ${unit === currentUnit ? 'selected' : ''}>${unit}</option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
                     </div>
                     
-                    <button class="btn btn-gray" onclick="updateUI()" style="margin-top: 1rem;">Close</button>
+                    <div class="settings-section">
+                        <h4 style="margin-bottom: 0.5rem;">Custom Reference Ranges for ${currentParent === 'mom' ? t('mom') : t('dad')}</h4>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">
+                            Override default reference ranges. Each parent can have different ranges.
+                        </p>
+                        ${testsForRangeCustomization.length === 0 ? `
+                            <div style="text-align: center; padding: 2rem; color: #6b7280; background: #f3f4f6; border-radius: 0.25rem;">
+                                Add some lab results first to customize their reference ranges
+                            </div>
+                        ` : `
+                            <div class="range-settings">
+                                ${testsForRangeCustomization.map(testKey => {
+                                    const [testName, unit] = testKey.split('-');
+                                    const customRange = parentRanges[testKey];
+                                    
+                                    let originalMin = '', originalMax = '';
+                                    labResults[currentParent].forEach(lab => {
+                                        lab.results.forEach(r => {
+                                            if (r.name === testName) {
+                                                const converted = convertResult(r);
+                                                if (converted.unit === unit && !customRange) {
+                                                    originalMin = converted.refMin;
+                                                    originalMax = converted.refMax;
+                                                }
+                                            }
+                                        });
+                                    });
+                                    
+                                    return `
+                                        <div class="range-item">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                                <div>
+                                                    <div style="font-weight: 600;">${testName}</div>
+                                                    <div style="font-size: 0.75rem; color: #6b7280;">Unit: ${unit}</div>
+                                                    ${!customRange && originalMin ? `
+                                                        <div style="font-size: 0.625rem; color: #9ca3af;">
+                                                            Default: ${originalMin} - ${originalMax}
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                                ${customRange ? `
+                                                    <button class="btn btn-red" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" 
+                                                            onclick="resetCustomRange('${testKey}')">
+                                                        Reset to Default
+                                                    </button>
+                                                ` : ''}
+                                            </div>
+                                            <div class="range-inputs">
+                                                <div>
+                                                    <label style="font-size: 0.75rem; font-weight: 500;">Minimum</label>
+                                                    <input type="number" step="0.01" 
+                                                           value="${customRange?.min ?? originalMin}"
+                                                           onchange="updateCustomRange('${testKey}', 'min', this.value, ${originalMax})"
+                                                           style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                                                </div>
+                                                <div>
+                                                    <label style="font-size: 0.75rem; font-weight: 500;">Maximum</label>
+                                                    <input type="number" step="0.01" 
+                                                           value="${customRange?.max ?? originalMax}"
+                                                           onchange="updateCustomRange('${testKey}', 'max', this.value, ${originalMin})"
+                                                           style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                                                </div>
+                                            </div>
+                                            ${customRange ? `
+                                                <div style="margin-top: 0.5rem; font-size: 0.75rem; background: #d1fae5; color: #065f46; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">
+                                                    ✓ Custom range active: ${customRange.min} - ${customRange.max} ${unit}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+                    
+                    <button class="btn btn-gray" onclick="updateUI()" style="margin-top: 1rem;">Close Settings</button>
                 </div>
             `;
             
@@ -1464,9 +2369,173 @@
             language = lang;
             updateTranslations();
             saveData();
+            showSettings(); // Refresh settings view
         }
 
-        // Sharing
+        function updateUnitPreference(testName, unit) {
+            unitPreferences[testName] = unit;
+            saveData();
+            // Don't refresh UI to keep settings open
+        }
+
+        function updateCustomRange(testKey, field, value, otherValue) {
+            const parentRanges = customRanges[currentParent] || {};
+            const val = parseFloat(value);
+            
+            if (!isNaN(val)) {
+                if (!parentRanges[testKey]) {
+                    parentRanges[testKey] = {};
+                }
+                
+                if (field === 'min') {
+                    parentRanges[testKey].min = val;
+                    parentRanges[testKey].max = parentRanges[testKey].max ?? otherValue;
+                } else {
+                    parentRanges[testKey].max = val;
+                    parentRanges[testKey].min = parentRanges[testKey].min ?? otherValue;
+                }
+                
+                customRanges[currentParent] = parentRanges;
+                saveData();
+                showSettings(); // Refresh to show updated state
+            }
+        }
+
+        function resetCustomRange(testKey) {
+            const parentRanges = customRanges[currentParent] || {};
+            delete parentRanges[testKey];
+            customRanges[currentParent] = parentRanges;
+            saveData();
+            showSettings(); // Refresh
+        }
+
+        // Export function with kidney summary
+        function exportToCSV() {
+            const parent = currentParent === 'mom' ? 'Mom' : 'Dad';
+            let csv = `${parent}'s Health Data Export\nGenerated: ${new Date().toLocaleString()}\n\n`;
+            
+            // Lab Results with enhanced flagging
+            csv += 'LAB RESULTS WITH REFERENCE RANGES\n';
+            csv += 'Date,Test Type,Test Name,Value,Unit,Reference Min,Reference Max,Status,Flag\n';
+            
+            labResults[currentParent].forEach(lab => {
+                lab.results.forEach(result => {
+                    const converted = convertResult(result);
+                    let status = 'Normal';
+                    let flag = '';
+                    
+                    if (converted.value < converted.refMin) {
+                        status = 'Low';
+                        flag = '⚠ BELOW RANGE';
+                    } else if (converted.value > converted.refMax) {
+                        status = 'High';
+                        flag = '⚠ ABOVE RANGE';
+                    }
+                    
+                    csv += `${lab.date},${lab.testType},${converted.name},${converted.value},${converted.unit},`;
+                    csv += `${converted.refMin},${converted.refMax},${status},${flag}\n`;
+                });
+            });
+            
+            // Kidney Function Summary
+            const kidneyTests = ['Creatinine', 'BUN', 'eGFR', 'BUN/Creatinine Ratio', 
+                                'Albumin/Creatinine Ratio', 'Uric Acid', 'Cystatin C'];
+            const kidneyData = [];
+            
+            kidneyTests.forEach(testName => {
+                let latest = null;
+                let latestDate = null;
+                labResults[currentParent].forEach(lab => {
+                    lab.results.forEach(result => {
+                        if (result.name === testName) {
+                            const labDate = new Date(lab.date);
+                            if (!latestDate || labDate > latestDate) {
+                                latestDate = labDate;
+                                latest = { ...convertResult(result), date: lab.date };
+                            }
+                        }
+                    });
+                });
+                if (latest) kidneyData.push(latest);
+            });
+            
+            if (kidneyData.length > 0) {
+                csv += '\nKIDNEY FUNCTION SUMMARY (Latest Results)\n';
+                csv += 'Test Name,Value,Unit,Reference Min,Reference Max,Status,Date\n';
+                kidneyData.forEach(test => {
+                    const status = test.value < test.refMin ? 'Low' : 
+                                  test.value > test.refMax ? 'High' : 'Normal';
+                    csv += `${test.name},${test.value},${test.unit},${test.refMin},${test.refMax},${status},${test.date}\n`;
+                });
+                
+                // Calculate kidney score
+                const kidneyScore = calculateKidneyScore();
+                csv += `\nKidney Health Score: ${kidneyScore.score}/100\n`;
+                if (kidneyScore.issues.length > 0) {
+                    csv += 'Areas of Concern:\n';
+                    kidneyScore.issues.forEach(issue => {
+                        csv += `- ${issue}\n`;
+                    });
+                }
+            }
+            
+            // Abnormal Values Summary
+            const abnormalCount = [];
+            labResults[currentParent].forEach(lab => {
+                lab.results.forEach(result => {
+                    const converted = convertResult(result);
+                    if (converted.value < converted.refMin || converted.value > converted.refMax) {
+                        abnormalCount.push({
+                            test: converted.name,
+                            value: converted.value,
+                            unit: converted.unit,
+                            status: converted.value < converted.refMin ? 'Low' : 'High',
+                            date: lab.date
+                        });
+                    }
+                });
+            });
+            
+            if (abnormalCount.length > 0) {
+                csv += '\nABNORMAL VALUES SUMMARY\n';
+                csv += 'Test,Value,Unit,Status,Date\n';
+                abnormalCount.forEach(item => {
+                    csv += `${item.test},${item.value},${item.unit},${item.status},${item.date}\n`;
+                });
+            }
+            
+            // Medications
+            csv += '\nMEDICATIONS\n';
+            csv += 'Name,Dosage,Frequency,Time\n';
+            medications[currentParent].forEach(med => {
+                csv += `${med.name},${med.dosage},${med.frequency},${med.time}\n`;
+            });
+            
+            // Appointments
+            csv += '\nAPPOINTMENTS\n';
+            csv += 'Date,Doctor,Type,Notes\n';
+            appointments[currentParent].forEach(apt => {
+                csv += `${apt.date},${apt.doctor},${apt.type},"${apt.notes || ''}"\n`;
+            });
+            
+            // Notes
+            csv += '\nNOTES\n';
+            csv += 'Date,Title,Category,Content\n';
+            notes[currentParent].forEach(note => {
+                csv += `${new Date(note.timestamp).toLocaleString()},"${note.title}",${note.category},"${note.content}"\n`;
+            });
+            
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${parent}_Health_Data_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Sharing functions
         async function toggleSharing() {
             if (!sharingEnabled) {
                 sharingEnabled = true;
@@ -1494,48 +2563,16 @@
             const input = document.getElementById('shareLink');
             input.select();
             document.execCommand('copy');
-            alert('Link copied to clipboard!');
-        }
-
-        // Export
-        function exportToCSV() {
-            const parent = currentParent === 'mom' ? 'Mom' : 'Dad';
-            let csv = `${parent}'s Health Data Export\nGenerated: ${new Date().toLocaleString()}\n\n`;
             
-            csv += 'LAB RESULTS\n';
-            csv += 'Date,Test Type,Test Name,Value,Unit,Reference Min,Reference Max,Status\n';
-            labResults[currentParent].forEach(lab => {
-                lab.results.forEach(result => {
-                    const status = result.value < result.refMin ? 'Low' : 
-                                  result.value > result.refMax ? 'High' : 'Normal';
-                    csv += `${lab.date},${lab.testType},${result.name},${result.value},${result.unit},${result.refMin},${result.refMax},${status}\n`;
-                });
-            });
-            
-            csv += '\nMEDICATIONS\n';
-            csv += 'Name,Dosage,Frequency,Time\n';
-            medications[currentParent].forEach(med => {
-                csv += `${med.name},${med.dosage},${med.frequency},${med.time}\n`;
-            });
-            
-            csv += '\nAPPOINTMENTS\n';
-            csv += 'Date,Doctor,Type,Notes\n';
-            appointments[currentParent].forEach(apt => {
-                csv += `${apt.date},${apt.doctor},${apt.type},"${apt.notes || ''}"\n`;
-            });
-            
-            csv += '\nNOTES\n';
-            csv += 'Date,Title,Category,Content\n';
-            notes[currentParent].forEach(note => {
-                csv += `${new Date(note.timestamp).toLocaleString()},"${note.title}",${note.category},"${note.content}"\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${parent}_Health_Data_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
+            // Show success message
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            btn.style.background = '#10b981';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+            }, 2000);
         }
     </script>
 </body>
