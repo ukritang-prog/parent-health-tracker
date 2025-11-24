@@ -1,14 +1,13 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Health Tracker - Collaborative Edition</title>
-
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -569,13 +568,12 @@
         
         const firebaseConfig = {
             // REPLACE THESE WITH YOUR ACTUAL FIREBASE CONFIG
-            apiKey: "YOUR-API-KEY-HERE",
-            authDomain: "YOUR-AUTH-DOMAIN.firebaseapp.com",
-            databaseURL: "https://YOUR-PROJECT.firebaseio.com",
-            projectId: "YOUR-PROJECT-ID",
-            storageBucket: "YOUR-PROJECT.appspot.com",
-            messagingSenderId: "YOUR-SENDER-ID",
-            appId: "YOUR-APP-ID"
+           apiKey: "AIzaSyBYgjxFGKI5i1r2HvPrw2v6DzUxOXYsQ9I",
+        authDomain: "pama-health-tracker.firebaseapp.com",
+        projectId: "pama-health-tracker",
+        storageBucket: "pama-health-tracker.firebasestorage.app",
+        messagingSenderId: "52183059396",
+        appId: "1:52183059396:web:51ccfaabf8e60591063291",
         };
         
         // Initialize Firebase
@@ -749,15 +747,14 @@
             let html = `<span style="margin-right: 0.5rem;">👥 ${onlineUsers.length} online:</span>`;
             
             onlineUsers.forEach(user => {
-           const firebaseConfig = {
-       apiKey: "your-actual-api-key-here",
-       authDomain: "your-project.firebaseapp.com",
-       databaseURL: "https://your-project.firebaseio.com",
-       projectId: "your-project-id",
-       storageBucket: "your-project.appspot.com",
-       messagingSenderId: "your-sender-id",
-       appId: "your-app-id"
-   };
+                html += `
+                    <div class="active-user" style="background: ${user.color};" title="${user.name}">
+                        ${user.name.charAt(0).toUpperCase()}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
         }
         
         // Activity logging
