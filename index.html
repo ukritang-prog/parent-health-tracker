@@ -848,20 +848,32 @@
     <div id="shareModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Share Dashboard</h3>
+                <h3 class="modal-title">🌐 Real-Time Dashboard Sharing</h3>
                 <button class="close-modal" onclick="closeShareModal()">&times;</button>
             </div>
             <div class="alert success">
-                <strong>Sharing is now enabled!</strong><br>
-                Anyone with this link can view and edit the health data.
+                <strong>✨ Real-time sharing is now enabled!</strong><br>
+                Multiple people can view and edit the health data simultaneously.<br>
+                Changes are synced automatically every 5 seconds.
             </div>
             <div class="form-group">
                 <label>Share this link with your caregiver:</label>
                 <input type="text" id="shareLink" readonly style="width: 100%; margin-top: 0.5rem;">
-                <button class="btn btn-blue" onclick="copyShareLink()" style="margin-top: 0.5rem;">Copy Link</button>
+                <button class="btn btn-blue" onclick="copyShareLink()" style="margin-top: 0.5rem;">📋 Copy Link</button>
             </div>
+            
+            <div style="background: #eff6ff; border: 1px solid #60a5fa; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                <h4 style="margin-bottom: 0.5rem;">🔄 How Real-Time Sync Works:</h4>
+                <ul style="font-size: 0.875rem; color: #1e40af; margin-left: 1.5rem;">
+                    <li>All users see updates within 5 seconds</li>
+                    <li>Multiple caregivers can add/edit data simultaneously</li>
+                    <li>Changes are saved instantly to the cloud</li>
+                    <li>No need to refresh the page - it updates automatically</li>
+                </ul>
+            </div>
+            
             <div class="alert warning">
-                <strong>⚠️ Important:</strong> Anyone with this link can access and modify the health data. Only share with trusted caregivers.
+                <strong>⚠️ Important:</strong> Anyone with this link can access and modify the health data in real-time. Only share with trusted caregivers and family members.
             </div>
         </div>
     </div>
@@ -895,6 +907,8 @@
         let sharingEnabled = false;
         let language = 'en';
         let currentTrendChart = null;
+        let editingRecord = null; // Track which record is being edited
+        let autoRefreshInterval = null; // For real-time updates
         
         // Complete lab templates with all 12 panels + Custom panels
         let labTemplates = {
@@ -1159,11 +1173,52 @@
             }
         };
 
-        // Initialize
+        // Initialize and Auto-Refresh for Real-Time Sharing
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
             updateUI();
+            
+            // Enable real-time refresh when sharing is active
+            setInterval(() => {
+                if (sharingEnabled) {
+                    loadDataSilently();
+                }
+            }, 5000); // Refresh every 5 seconds when sharing is enabled
         });
+
+        // Silent data reload for real-time updates
+        async function loadDataSilently() {
+            try {
+                if (typeof window.storage !== 'undefined') {
+                    const labsResult = await window.storage.get('lab-results', sharingEnabled);
+                    const medsResult = await window.storage.get('medications', sharingEnabled);
+                    const aptsResult = await window.storage.get('appointments', sharingEnabled);
+                    const notesResult = await window.storage.get('notes', sharingEnabled);
+                    const vitalsResult = await window.storage.get('vital-signs', sharingEnabled);
+                    
+                    // Check if data has changed
+                    const newLabs = labsResult?.value ? JSON.parse(labsResult.value) : null;
+                    const newMeds = medsResult?.value ? JSON.parse(medsResult.value) : null;
+                    
+                    if (JSON.stringify(newLabs) !== JSON.stringify(labResults) ||
+                        JSON.stringify(newMeds) !== JSON.stringify(medications)) {
+                        // Data has changed, reload everything
+                        if (labsResult?.value) labResults = JSON.parse(labsResult.value);
+                        if (medsResult?.value) medications = JSON.parse(medsResult.value);
+                        if (aptsResult?.value) appointments = JSON.parse(aptsResult.value);
+                        if (notesResult?.value) notes = JSON.parse(notesResult.value);
+                        if (vitalsResult?.value) vitalSigns = JSON.parse(vitalsResult.value);
+                        
+                        // Only update UI if not in the middle of editing
+                        if (!editingRecord) {
+                            updateUI();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error in silent reload:', error);
+            }
+        }
 
         // Translation helper
         function t(key) {
@@ -1877,14 +1932,27 @@
             } else {
                 labs.sort((a, b) => new Date(b.date) - new Date(a.date));
                 labs.forEach(lab => {
+                    // Check if linked to appointment
+                    const linkedApt = lab.appointmentId ? 
+                        appointments[currentParent].find(a => a.id === lab.appointmentId) : null;
+                    
                     html += `
                         <div class="lab-result-card">
                             <div class="lab-result-header">
                                 <div>
                                     <div class="lab-result-title">${lab.testType}</div>
                                     <div class="lab-result-date">${lab.date}</div>
+                                    ${linkedApt ? `
+                                        <div style="font-size: 0.75rem; color: #7c3aed; margin-top: 0.25rem;">
+                                            🔗 Linked to appointment: ${linkedApt.type} with ${linkedApt.doctor}
+                                        </div>
+                                    ` : ''}
                                 </div>
-                                <button class="delete-btn" onclick="deleteLabResult(${lab.id})">×</button>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn btn-blue" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" 
+                                            onclick="editLabResult(${lab.id})">✏️ Edit</button>
+                                    <button class="delete-btn" onclick="deleteLabResult(${lab.id})">×</button>
+                                </div>
                             </div>
                             <div class="lab-results-grid">
                     `;
@@ -1929,6 +1997,96 @@
             document.getElementById('contentArea').innerHTML = html;
         }
 
+        // Edit Lab Result
+        function editLabResult(id) {
+            const lab = labResults[currentParent].find(l => l.id === id);
+            if (!lab) return;
+            
+            editingRecord = lab;
+            const testTypes = Object.keys(labTemplates);
+            
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Edit Lab Results</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="labDate" value="${lab.date}">
+                        </div>
+                        <div class="form-group">
+                            <label>Test Type</label>
+                            <select id="labTestType" value="${lab.testType}" disabled style="background: #e5e7eb;">
+                                <option value="${lab.testType}">${lab.testType}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Link to Appointment (Optional)</label>
+                        <select id="linkedAppointment" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                            <option value="">No linked appointment</option>
+                            ${appointments[currentParent]
+                                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                .map(apt => `
+                                    <option value="${apt.id}" ${lab.appointmentId === apt.id ? 'selected' : ''}>
+                                        ${apt.date} - ${apt.type} with ${apt.doctor}
+                                    </option>
+                                `).join('')}
+                        </select>
+                    </div>
+                    
+                    <h4 style="margin: 1rem 0 0.5rem;">Update Results</h4>
+                    <div style="max-height: 400px; overflow-y: auto;">
+            `;
+            
+            lab.results.forEach((result, index) => {
+                html += `
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding: 0.75rem; background: #f3f4f6; border-radius: 0.25rem;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; font-size: 0.875rem;">${result.name}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Ref: ${result.refMin} - ${result.refMax} ${result.unit}</div>
+                        </div>
+                        <input type="number" step="0.01" id="labValue_${index}" value="${result.value}" 
+                               style="width: 100px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                        <span style="font-size: 0.875rem; color: #6b7280; width: 60px;">${result.unit}</span>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="updateLabResult()">Save Changes</button>
+                        <button class="btn btn-gray" onclick="updateUI()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function updateLabResult() {
+            if (!editingRecord) return;
+            
+            const date = document.getElementById('labDate').value;
+            const appointmentId = document.getElementById('linkedAppointment').value;
+            
+            // Update values
+            editingRecord.date = date;
+            editingRecord.appointmentId = appointmentId || null;
+            
+            editingRecord.results.forEach((result, index) => {
+                const newValue = parseFloat(document.getElementById(`labValue_${index}`).value);
+                if (!isNaN(newValue)) {
+                    result.value = newValue;
+                }
+            });
+            
+            saveData();
+            editingRecord = null;
+            updateUI();
+        }
+
         function showMedications() {
             const meds = medications[currentParent];
             let html = '';
@@ -1939,10 +2097,18 @@
                 meds.forEach(med => {
                     html += `
                         <div class="medication-card">
-                            <button class="delete-btn" onclick="deleteMedication(${med.id})">×</button>
-                            <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${med.name}</div>
-                            <div style="color: #4b5563;">${med.dosage} - ${med.frequency}</div>
-                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Take at ${med.time}</div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${med.name}</div>
+                                    <div style="color: #4b5563;">${med.dosage} - ${med.frequency}</div>
+                                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Take at ${med.time}</div>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: start;">
+                                    <button class="btn btn-blue" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; height: fit-content;" 
+                                            onclick="editMedication(${med.id})">✏️ Edit</button>
+                                    <button class="delete-btn" onclick="deleteMedication(${med.id})">×</button>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
@@ -1958,14 +2124,38 @@
             if (apts.length === 0) {
                 html = '<div class="empty-state">No appointments scheduled</div>';
             } else {
+                apts.sort((a, b) => new Date(b.date) - new Date(a.date));
                 apts.forEach(apt => {
+                    // Find linked lab results
+                    const linkedLabs = labResults[currentParent].filter(lab => lab.appointmentId === apt.id);
+                    
                     html += `
                         <div class="appointment-card">
-                            <button class="delete-btn" onclick="deleteAppointment(${apt.id})">×</button>
-                            <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${apt.type}</div>
-                            <div style="color: #4b5563;">with ${apt.doctor}</div>
-                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">${apt.date}</div>
-                            ${apt.notes ? `<div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">${apt.notes}</div>` : ''}
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${apt.type}</div>
+                                    <div style="color: #4b5563;">with ${apt.doctor}</div>
+                                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">${apt.date}</div>
+                                    ${apt.notes ? `<div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">${apt.notes}</div>` : ''}
+                                    ${linkedLabs.length > 0 ? `
+                                        <div style="margin-top: 0.75rem; padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem;">
+                                            <div style="font-size: 0.875rem; color: #1e40af; font-weight: 600;">
+                                                📋 Linked Lab Results:
+                                            </div>
+                                            ${linkedLabs.map(lab => `
+                                                <div style="font-size: 0.75rem; color: #3730a3; margin-top: 0.25rem;">
+                                                    • ${lab.testType} (${lab.date})
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: start;">
+                                    <button class="btn btn-blue" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; height: fit-content;" 
+                                            onclick="editAppointment(${apt.id})">✏️ Edit</button>
+                                    <button class="delete-btn" onclick="deleteAppointment(${apt.id})">×</button>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
@@ -1984,17 +2174,188 @@
                 notesList.forEach(note => {
                     html += `
                         <div class="note-card">
-                            <button class="delete-btn" onclick="deleteNote(${note.id})">×</button>
-                            <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${note.title}</div>
-                            <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; padding: 0.125rem 0.5rem; border-radius: 0.25rem;">${note.category}</span>
-                            <div style="color: #4b5563; margin-top: 0.5rem;">${note.content}</div>
-                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">${new Date(note.timestamp).toLocaleString()}</div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${note.title}</div>
+                                    <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; padding: 0.125rem 0.5rem; border-radius: 0.25rem;">${note.category}</span>
+                                    <div style="color: #4b5563; margin-top: 0.5rem;">${note.content}</div>
+                                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">${new Date(note.timestamp).toLocaleString()}</div>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: start;">
+                                    <button class="btn btn-blue" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; height: fit-content;" 
+                                            onclick="editNote(${note.id})">✏️ Edit</button>
+                                    <button class="delete-btn" onclick="deleteNote(${note.id})">×</button>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
             }
             
             document.getElementById('contentArea').innerHTML = html;
+        }
+
+        // Edit Medication
+        function editMedication(id) {
+            const med = medications[currentParent].find(m => m.id === id);
+            if (!med) return;
+            
+            editingRecord = med;
+            
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Edit Medication</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Medication Name</label>
+                            <input type="text" id="medName" value="${med.name}">
+                        </div>
+                        <div class="form-group">
+                            <label>Dosage</label>
+                            <input type="text" id="medDosage" value="${med.dosage}">
+                        </div>
+                        <div class="form-group">
+                            <label>Frequency</label>
+                            <select id="medFrequency">
+                                <option ${med.frequency === 'Once daily' ? 'selected' : ''}>Once daily</option>
+                                <option ${med.frequency === 'Twice daily' ? 'selected' : ''}>Twice daily</option>
+                                <option ${med.frequency === 'Three times daily' ? 'selected' : ''}>Three times daily</option>
+                                <option ${med.frequency === 'As needed' ? 'selected' : ''}>As needed</option>
+                                <option ${med.frequency === 'Weekly' ? 'selected' : ''}>Weekly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="medTime" value="${med.time}">
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="updateMedication()">Save Changes</button>
+                        <button class="btn btn-gray" onclick="cancelEdit()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function updateMedication() {
+            if (!editingRecord) return;
+            
+            editingRecord.name = document.getElementById('medName').value;
+            editingRecord.dosage = document.getElementById('medDosage').value;
+            editingRecord.frequency = document.getElementById('medFrequency').value;
+            editingRecord.time = document.getElementById('medTime').value;
+            
+            saveData();
+            editingRecord = null;
+            updateUI();
+        }
+
+        // Edit Appointment
+        function editAppointment(id) {
+            const apt = appointments[currentParent].find(a => a.id === id);
+            if (!apt) return;
+            
+            editingRecord = apt;
+            
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Edit Appointment</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Date & Time</label>
+                            <input type="datetime-local" id="aptDate" value="${apt.date}">
+                        </div>
+                        <div class="form-group">
+                            <label>Doctor</label>
+                            <input type="text" id="aptDoctor" value="${apt.doctor}">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Appointment Type</label>
+                            <input type="text" id="aptType" value="${apt.type}">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Notes</label>
+                            <textarea id="aptNotes" rows="3">${apt.notes || ''}</textarea>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="updateAppointment()">Save Changes</button>
+                        <button class="btn btn-gray" onclick="cancelEdit()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function updateAppointment() {
+            if (!editingRecord) return;
+            
+            editingRecord.date = document.getElementById('aptDate').value;
+            editingRecord.doctor = document.getElementById('aptDoctor').value;
+            editingRecord.type = document.getElementById('aptType').value;
+            editingRecord.notes = document.getElementById('aptNotes').value;
+            
+            saveData();
+            editingRecord = null;
+            updateUI();
+        }
+
+        // Edit Note
+        function editNote(id) {
+            const note = notes[currentParent].find(n => n.id === id);
+            if (!note) return;
+            
+            editingRecord = note;
+            
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Edit Note</h3>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="noteTitle" value="${note.title}">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="noteCategory">
+                            <option ${note.category === 'General' ? 'selected' : ''}>General</option>
+                            <option ${note.category === 'Symptoms' ? 'selected' : ''}>Symptoms</option>
+                            <option ${note.category === 'Diet' ? 'selected' : ''}>Diet</option>
+                            <option ${note.category === 'Exercise' ? 'selected' : ''}>Exercise</option>
+                            <option ${note.category === 'Concerns' ? 'selected' : ''}>Concerns</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Content</label>
+                        <textarea id="noteContent" rows="4">${note.content}</textarea>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="updateNote()">Save Changes</button>
+                        <button class="btn btn-gray" onclick="cancelEdit()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function updateNote() {
+            if (!editingRecord) return;
+            
+            editingRecord.title = document.getElementById('noteTitle').value;
+            editingRecord.category = document.getElementById('noteCategory').value;
+            editingRecord.content = document.getElementById('noteContent').value;
+            
+            saveData();
+            editingRecord = null;
+            updateUI();
+        }
+
+        function cancelEdit() {
+            editingRecord = null;
+            updateUI();
         }
 
         function showAddForm() {
@@ -2021,6 +2382,16 @@
         function showVitalSigns() {
             const vitals = vitalSigns[currentParent] || [];
             let html = '';
+            
+            // Show real-time sync status if sharing is enabled
+            if (sharingEnabled) {
+                html += `
+                    <div class="alert info" style="margin-bottom: 1rem;">
+                        <strong>🔄 Real-Time Sync Active</strong><br>
+                        Data refreshes automatically every 5 seconds. All changes by other users appear instantly.
+                    </div>
+                `;
+            }
             
             // Get latest vitals for summary
             const latestVitals = vitals.length > 0 ? vitals[vitals.length - 1] : null;
@@ -2127,7 +2498,11 @@
                                     <div class="lab-result-title">Vital Signs Record</div>
                                     <div class="lab-result-date">${vital.date} ${vital.time}</div>
                                 </div>
-                                <button class="delete-btn" onclick="deleteVitalSign(${vital.id})">×</button>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn btn-blue" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" 
+                                            onclick="editVitalSign(${vital.id})">✏️ Edit</button>
+                                    <button class="delete-btn" onclick="deleteVitalSign(${vital.id})">×</button>
+                                </div>
                             </div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
                     `;
@@ -2162,6 +2537,98 @@
             }
             
             document.getElementById('contentArea').innerHTML = html;
+        }
+
+        // Edit Vital Signs
+        function editVitalSign(id) {
+            const vital = vitalSigns[currentParent].find(v => v.id === id);
+            if (!vital) return;
+            
+            editingRecord = vital;
+            
+            let html = `
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Edit Vital Signs</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="vitalDate" value="${vital.date}">
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="vitalTime" value="${vital.time}">
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin: 1rem 0 0.5rem;">Vital Measurements</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>${t('bloodPressure')} (Systolic)</label>
+                            <input type="number" id="bpSystolic" value="${vital.bloodPressureSystolic || ''}" placeholder="120" min="60" max="250">
+                        </div>
+                        <div class="form-group">
+                            <label>${t('bloodPressure')} (Diastolic)</label>
+                            <input type="number" id="bpDiastolic" value="${vital.bloodPressureDiastolic || ''}" placeholder="80" min="40" max="150">
+                        </div>
+                        <div class="form-group">
+                            <label>${t('heartRate')} (bpm)</label>
+                            <input type="number" id="heartRate" value="${vital.heartRate || ''}" placeholder="60-100" min="30" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label>${t('temperature')} (°C)</label>
+                            <input type="number" step="0.1" id="temperature" value="${vital.temperature || ''}" placeholder="36.1-37.8" min="35" max="42">
+                        </div>
+                        <div class="form-group">
+                            <label>${t('oxygenSat')} (%)</label>
+                            <input type="number" id="oxygenSat" value="${vital.oxygenSat || ''}" placeholder="95-100" min="50" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>${t('weight')} (kg)</label>
+                            <input type="number" step="0.1" id="weight" value="${vital.weight || ''}" placeholder="Weight" min="20" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label>${t('bloodGlucose')} (mg/dL)</label>
+                            <input type="number" id="bloodGlucose" value="${vital.bloodGlucose || ''}" placeholder="70-140" min="20" max="600">
+                        </div>
+                        <div class="form-group">
+                            <label>${t('respiratoryRate')} (/min)</label>
+                            <input type="number" id="respiratoryRate" value="${vital.respiratoryRate || ''}" placeholder="12-20" min="5" max="60">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="vitalNotes" rows="2" placeholder="Any additional notes...">${vital.notes || ''}</textarea>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-blue" onclick="updateVitalSign()">Save Changes</button>
+                        <button class="btn btn-gray" onclick="cancelEdit()" style="margin-left: 0.5rem;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function updateVitalSign() {
+            if (!editingRecord) return;
+            
+            editingRecord.date = document.getElementById('vitalDate').value;
+            editingRecord.time = document.getElementById('vitalTime').value;
+            editingRecord.bloodPressureSystolic = parseFloat(document.getElementById('bpSystolic').value) || null;
+            editingRecord.bloodPressureDiastolic = parseFloat(document.getElementById('bpDiastolic').value) || null;
+            editingRecord.heartRate = parseFloat(document.getElementById('heartRate').value) || null;
+            editingRecord.temperature = parseFloat(document.getElementById('temperature').value) || null;
+            editingRecord.oxygenSat = parseFloat(document.getElementById('oxygenSat').value) || null;
+            editingRecord.weight = parseFloat(document.getElementById('weight').value) || null;
+            editingRecord.bloodGlucose = parseFloat(document.getElementById('bloodGlucose').value) || null;
+            editingRecord.respiratoryRate = parseFloat(document.getElementById('respiratoryRate').value) || null;
+            editingRecord.notes = document.getElementById('vitalNotes').value;
+            
+            saveData();
+            editingRecord = null;
+            updateUI();
         }
 
         function showVitalSignsForm() {
@@ -3258,4 +3725,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
