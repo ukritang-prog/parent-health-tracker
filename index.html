@@ -749,14 +749,15 @@
             let html = `<span style="margin-right: 0.5rem;">👥 ${onlineUsers.length} online:</span>`;
             
             onlineUsers.forEach(user => {
-                html += `
-                    <div class="active-user" style="background: ${user.color};" title="${user.name}">
-                        ${user.name.charAt(0).toUpperCase()}
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
+           const firebaseConfig = {
+       apiKey: "your-actual-api-key-here",
+       authDomain: "your-project.firebaseapp.com",
+       databaseURL: "https://your-project.firebaseio.com",
+       projectId: "your-project-id",
+       storageBucket: "your-project.appspot.com",
+       messagingSenderId: "your-sender-id",
+       appId: "your-app-id"
+   };
         }
         
         // Activity logging
